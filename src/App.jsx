@@ -6,7 +6,7 @@ import Offers from './components/Offers'
 import About from './components/About'
 import HowToOrder from './components/HowToOrder'
 import Footer from './components/Footer'
-import HelpButton from './components/HelpButton'
+import ChatbotWidget from './components/ChatbotWidget'
 import CartButton from './components/CartButton'
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
         <About />
       </main>
       <Footer />
-      <HelpButton />
+      <ChatbotWidget />
       <CartButton />
     </div>
   )
