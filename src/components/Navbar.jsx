@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import logo from '../assets/logos/logoBaconjr.svg'
 import letras from '../assets/logos/letrasBaconJr.svg'
+import AuthModal from './AuthModal'
 
 const NAV_LINKS = [
   { label: 'Menu', href: '#menu' },
@@ -10,6 +11,7 @@ const NAV_LINKS = [
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-neutral-200">
@@ -53,12 +55,13 @@ function Navbar() {
             </a>
           </div>
 
-          <a
-            href="#offers"
+          <button
+            type="button"
+            onClick={() => setIsAuthModalOpen(true)}
             className="inline-flex items-center px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
           >
             Ordena ahora
-          </a>
+          </button>
         </div>
       </div>
 
@@ -66,8 +69,8 @@ function Navbar() {
         <div className="border-t border-neutral-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
             {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
+              
+                <a key={link.href}
                 href={link.href}
                 className="block text-sm font-medium text-neutral-600 hover:text-black transition-colors"
                 onClick={() => setIsMenuOpen(false)}
@@ -78,6 +81,8 @@ function Navbar() {
           </div>
         </div>
       )}
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </nav>
   )
 }
