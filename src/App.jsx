@@ -1,6 +1,6 @@
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import CategoryFilters from './components/CategoryFilters'
+import Menu from './components/Menu'
 import HeroSlider from './components/HeroSlider'
 import Offers from './components/Offers'
 import About from './components/About'
@@ -8,23 +8,26 @@ import HowToOrder from './components/HowToOrder'
 import Footer from './components/Footer'
 import ChatbotWidget from './components/ChatbotWidget'
 import CartButton from './components/CartButton'
+import { CartProvider } from './context/CartContext'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <main>
-        <Hero />
-        <CategoryFilters />
-        <HeroSlider />
-        <HowToOrder />
-        <Offers />
-        <About />
-      </main>
-      <Footer />
-      <ChatbotWidget />
-      <CartButton />
-    </div>
+    <CartProvider>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main>
+          <Hero />
+          <Menu />
+          <HeroSlider />
+          <HowToOrder />
+          <Offers />
+          <About />
+        </main>
+        <Footer />
+        <ChatbotWidget />
+        <CartButton />
+      </div>
+    </CartProvider>
   )
 }
 
