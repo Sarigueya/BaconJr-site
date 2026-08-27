@@ -7,7 +7,6 @@ const FOOTER_LINKS = {
   ],
   company: [
     { label: 'Nuestra Historia', href: '#about' },
-    { label: 'Sucursales', href: '#location' },
     { label: 'Empleo', href: '#' },
     { label: 'Prensa', href: '#' },
   ],

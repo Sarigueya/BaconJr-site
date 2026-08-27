@@ -22,7 +22,7 @@ const BANNERS = [
   },
 ]
 
-const SLIDE_INTERVAL = 5000
+const SLIDE_INTERVAL = 4000
 
 function HeroSlider() {
   const [current, setCurrent] = useState(0)
@@ -31,6 +31,10 @@ function HeroSlider() {
 
   const goToNext = useCallback(() => {
     setCurrent((prev) => (prev + 1) % BANNERS.length)
+  }, [])
+
+  const goToPrev = useCallback(() => {
+    setCurrent((prev) => (prev - 1 + BANNERS.length) % BANNERS.length)
   }, [])
 
   useEffect(() => {
@@ -59,18 +63,54 @@ function HeroSlider() {
         ))}
       </div>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      <button
+        type="button"
+        onClick={goToPrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        aria-label="Slide anterior"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        onClick={goToNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        aria-label="Siguiente slide"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
         {BANNERS.map((_, index) => (
           <button
             key={index}
             type="button"
             onClick={() => setCurrent(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              index === current ? 'bg-white' : 'bg-white/40'
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              index === current ? 'w-8 bg-white' : 'w-3 bg-white/40'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
+      </div>
+
+      <div className="absolute bottom-0 left-0 h-1 bg-white/30 w-full">
+        <div
+          key={current}
+          className="h-full bg-white transition-[width] ease-linear"
+          style={{
+            width: isPaused ? '0%' : '100%',
+            animationName: 'autoProgress',
+            animationDuration: `${SLIDE_INTERVAL}ms`,
+            animationTimingFunction: 'linear',
+            animationPlayState: isPaused ? 'paused' : 'running',
+          }}
+        />
       </div>
     </section>
   )

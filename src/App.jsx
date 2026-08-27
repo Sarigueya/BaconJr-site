@@ -4,9 +4,10 @@ import CategoryFilters from './components/CategoryFilters'
 import HeroSlider from './components/HeroSlider'
 import Offers from './components/Offers'
 import About from './components/About'
-import MapLocation from './components/MapLocation'
+import HowToOrder from './components/HowToOrder'
 import Footer from './components/Footer'
 import HelpButton from './components/HelpButton'
+import CartButton from './components/CartButton'
 
 function App() {
   return (
@@ -16,12 +17,13 @@ function App() {
         <Hero />
         <CategoryFilters />
         <HeroSlider />
+        <HowToOrder />
         <Offers />
         <About />
-        <MapLocation />
       </main>
       <Footer />
       <HelpButton />
+      <CartButton />
     </div>
   )
 }

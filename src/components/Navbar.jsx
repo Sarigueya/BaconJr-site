@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import logo from '../assets/logos/logoBaconjr.svg'
+import letras from '../assets/logos/letrasBaconJr.svg'
 
 const NAV_LINKS = [
-  { label: 'Menu', href: '#' },
+  { label: 'Menu', href: '#menu' },
   { label: 'Ofertas', href: '#offers' },
   { label: 'Nosotros', href: '#about' },
-  { label: 'Sucursales', href: '#location' },
 ]
 
 function Navbar() {
@@ -46,11 +47,9 @@ function Navbar() {
               </svg>
             </button>
 
-            <a
-              href="#"
-              className="text-xl font-bold text-black tracking-tight"
-            >
-              BACON JR.
+            <a href="#" className="flex items-center gap-2" aria-label="Bacon Jr. — Inicio">
+              <img src={letras} alt="Bacon Jr." className="h-7 w-auto" />
+              <img src={logo} alt="" className="h-10 w-auto" />
             </a>
           </div>
 
