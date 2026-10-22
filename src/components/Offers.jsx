@@ -24,18 +24,18 @@ const OFFERS = [
 
 function OfferCard({ offer }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-[16/9] bg-neutral-100 flex items-center justify-center">
-        <span className="text-neutral-400 text-sm">Imagen de oferta</span>
+    <div className="bg-white border border-arena rounded-lg overflow-hidden hover:shadow-lg hover:border-brasa transition-all">
+      <div className="aspect-[16/9] bg-arena/50 flex items-center justify-center">
+        <span className="text-humo text-sm">Imagen de oferta</span>
       </div>
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-black mb-1">{offer.title}</h3>
-        <p className="text-sm text-neutral-500 mb-4">{offer.description}</p>
+        <h3 className="text-lg font-semibold text-carbon mb-1">{offer.title}</h3>
+        <p className="text-sm text-humo mb-4">{offer.description}</p>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-neutral-400 line-through">
+          <span className="text-sm text-humo line-through">
             {offer.originalPrice}
           </span>
-          <span className="text-xl font-bold text-black">{offer.currentPrice}</span>
+          <span className="text-xl font-bold text-brasa">{offer.currentPrice}</span>
         </div>
       </div>
     </div>
@@ -44,13 +44,13 @@ function OfferCard({ offer }) {
 
 function Offers() {
   return (
-    <section id="offers" className="bg-white py-16 md:py-24">
+    <section id="offers" className="bg-crema py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
             Ofertas del día
           </h2>
-          <p className="text-neutral-500 max-w-md mx-auto">
+          <p className="text-humo max-w-md mx-auto">
             Aprovecha nuestras promociones especiales para disfrutar
             el mejor sabor a mejor precio.
           </p>

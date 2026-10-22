@@ -13,20 +13,20 @@ const RESTAURANT_INFO = {
 
 function MapLocation() {
   return (
-    <section id="location" className="bg-white py-16 md:py-24">
+    <section id="location" className="bg-crema py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
             Encuéntranos
           </h2>
-          <p className="text-neutral-500 max-w-md mx-auto">
+          <p className="text-humo max-w-md mx-auto">
             Visítanos y disfruta del mejor sabor al carbón
             en un ambiente único.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 rounded-lg overflow-hidden border border-neutral-200">
+          <div className="lg:col-span-2 rounded-lg overflow-hidden border border-arena">
             <MapContainer
               center={[RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng]}
               zoom={15}
@@ -49,19 +49,19 @@ function MapLocation() {
 
           <div className="flex flex-col justify-center space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-black mb-1">
+              <h3 className="text-lg font-semibold text-roble mb-1">
                 Dirección
               </h3>
               <p className="text-neutral-600">{RESTAURANT_INFO.address}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-black mb-1">
+              <h3 className="text-lg font-semibold text-roble mb-1">
                 Horario
               </h3>
               <p className="text-neutral-600">{RESTAURANT_INFO.hours}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-black mb-1">
+              <h3 className="text-lg font-semibold text-roble mb-1">
                 Contacto
               </h3>
               <p className="text-neutral-600">+52 55 1234 5678</p>

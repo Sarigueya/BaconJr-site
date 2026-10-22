@@ -66,7 +66,7 @@ function HeroSlider() {
       <button
         type="button"
         onClick={goToPrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-carbon/50 text-white rounded-full hover:bg-fuego transition-colors"
         aria-label="Slide anterior"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@ function HeroSlider() {
       <button
         type="button"
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-carbon/50 text-white rounded-full hover:bg-fuego transition-colors"
         aria-label="Siguiente slide"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ function HeroSlider() {
             type="button"
             onClick={() => setCurrent(index)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === current ? 'w-8 bg-white' : 'w-3 bg-white/40'
+              index === current ? 'w-8 bg-dorado' : 'w-3 bg-white/40'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -102,7 +102,7 @@ function HeroSlider() {
       <div className="absolute bottom-0 left-0 h-1 bg-white/30 w-full">
         <div
           key={current}
-          className="h-full bg-white transition-[width] ease-linear"
+          className="h-full bg-dorado transition-[width] ease-linear"
           style={{
             width: isPaused ? '0%' : '100%',
             animationName: 'autoProgress',

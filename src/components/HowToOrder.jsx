@@ -51,13 +51,13 @@ const STEPS = [
 
 function HowToOrder() {
   return (
-    <section className="bg-neutral-100 py-16 md:py-24">
+    <section className="bg-arena/40 py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
             ¿Cómo pedir?
           </h2>
-          <p className="text-neutral-500 max-w-md mx-auto">
+          <p className="text-humo max-w-md mx-auto">
             Pedir en Bacon Jr. nunca fue tan fácil. Sigue estos tres pasos
             y disfruta del mejor sabor al carbón.
           </p>
@@ -69,16 +69,16 @@ function HowToOrder() {
               key={step.id}
               className="relative rounded-2xl bg-white p-7 shadow-lg hover:-translate-y-1 transition-transform"
             >
-              <span className="absolute top-4 right-6 text-5xl font-bold text-neutral-100 select-none">
+              <span className="absolute top-4 right-6 text-5xl font-bold text-arena select-none">
                 {step.number}
               </span>
 
-              <div className="w-16 h-16 rounded-xl bg-black text-white flex items-center justify-center mb-5">
+              <div className="w-16 h-16 rounded-xl bg-fuego text-white flex items-center justify-center mb-5">
                 {step.icon}
               </div>
 
-              <h3 className="text-xl font-bold text-black mb-2">{step.title}</h3>
-              <p className="text-neutral-600 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-carbon mb-2">{step.title}</h3>
+              <p className="text-humo text-sm leading-relaxed">
                 {step.description}
               </p>
             </div>

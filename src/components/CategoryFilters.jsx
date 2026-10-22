@@ -10,8 +10,8 @@ function CategoryFilters({ activeCategory, onChange }) {
           onClick={() => onChange(category.id)}
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             activeCategory === category.id
-              ? 'bg-black text-white'
-              : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                            ? 'bg-carbon text-dorado'
+              : 'bg-white text-humo border border-arena hover:border-fuego hover:text-fuego'
           }`}
         >
           {category.label}
