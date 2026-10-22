@@ -51,17 +51,17 @@ function LocationModal({ isOpen, onClose }) {
       >
         <div className="flex items-start justify-between p-6 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-black">
+            <h2 className="text-xl font-bold text-carbon">
               ¿Dónde te encuentras?
             </h2>
-            <p className="text-sm text-neutral-500 mt-1">
+            <p className="text-sm text-humo mt-1">
               Encontramos la sucursal más cercana para tu pedido.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 -mr-1 text-neutral-500 hover:text-black transition-colors"
+            className="p-1 -mr-1 text-humo hover:text-fuego transition-colors"
             aria-label="Cerrar"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,17 +79,17 @@ function LocationModal({ isOpen, onClose }) {
             id="location-address"
             type="text"
             placeholder="Escribe tu dirección"
-            className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-sm text-black placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full px-4 py-3 border border-arena rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego"
           />
         </div>
 
         <div
-          className="mx-6 flex items-center justify-center rounded-lg border border-neutral-200 bg-gradient-to-br from-neutral-100 to-neutral-200"
+          className="mx-6 flex items-center justify-center rounded-lg border border-arena bg-gradient-to-br from-neutral-100 to-neutral-200"
           style={{ height: '220px' }}
         >
-          <div className="flex flex-col items-center text-neutral-500">
+          <div className="flex flex-col items-center text-humo">
             <svg
-              className="w-10 h-10 text-black"
+              className="w-10 h-10 text-carbon"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -110,31 +110,31 @@ function LocationModal({ isOpen, onClose }) {
           {NEARBY_STORES.map((store) => (
             <div
               key={store.id}
-              className="flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-3"
+              className="flex items-center justify-between rounded-lg border border-arena px-4 py-3"
             >
               <div>
-                <p className="text-sm font-semibold text-black">{store.name}</p>
-                <p className="text-xs text-neutral-500">{store.address}</p>
+                <p className="text-sm font-semibold text-carbon">{store.name}</p>
+                <p className="text-xs text-humo">{store.address}</p>
               </div>
-              <span className="text-xs font-medium text-neutral-600 whitespace-nowrap ml-3">
+              <span className="text-xs font-medium text-humo whitespace-nowrap ml-3">
                 {store.distance}
               </span>
             </div>
           ))}
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-neutral-50">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-crema">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-neutral-600 hover:text-black transition-colors"
+            className="px-5 py-2 text-sm font-semibold text-humo hover:text-fuego transition-colors"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
+            className="px-5 py-2 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
           >
             Confirmar
           </button>
