@@ -25,7 +25,7 @@ function Navbar() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="p-2 -ml-2 text-neutral-600 hover:text-black transition-colors"
+              className="p-2 -ml-2 text-humo hover:text-fuego transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
               aria-expanded={isMenuOpen}
@@ -63,7 +63,7 @@ function Navbar() {
           <button
             type="button"
             onClick={() => setIsAuthModalOpen(true)}
-            className="inline-flex items-center px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
+            className="inline-flex items-center px-5 py-2 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
           >
             Ordena ahora
           </button>
@@ -77,7 +77,7 @@ function Navbar() {
               
                 <a key={link.href}
                 href={link.href}
-                className="block text-sm font-medium text-neutral-600 hover:text-black transition-colors"
+                className="block text-sm font-medium text-humo hover:text-fuego transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
