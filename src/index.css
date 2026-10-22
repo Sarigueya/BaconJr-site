@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@theme {
+  --color-carbon: #1C1410;        /* negro cálido: textos, footer, hero */
+  --color-carbon-suave: #2B1E16;  /* hover sobre fondos oscuros */
+  --color-roble: #6B3E1F;         /* café: precios, títulos secundarios */
+  --color-fuego: #C2410C;         /* naranja principal: botones de acción */
+  --color-fuego-oscuro: #9A3412;  /* hover de botones naranja */
+  --color-llama: #F28C28;         /* naranja brillante: íconos/acentos en fondo oscuro */
+  --color-dorado: #F5A623;        /* amarillo: destacados, estrellas, texto sobre carbón */
+  --color-brasa: #B91C1C;         /* rojo: ofertas, descuentos, contador del carrito */
+  --color-crema: #FFF8EE;         /* fondo general cálido */
+  --color-arena: #EADBC8;         /* bordes y separadores */
+  --color-humo: #7A6555;          /* texto secundario */
+}
+
+body {
+  background-color: var(--color-crema);
+  color: var(--color-carbon);
+}
+
 @keyframes autoProgress {
   from {
     width: 0%;

@@ -12,13 +12,13 @@ function Menu() {
   }, [activeCategory])
 
   return (
-    <section id="menu" className="bg-white py-8 md:py-12">
+    <section id="menu" className="bg-crema py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
             Nuestro menú
           </h2>
-          <p className="text-neutral-500 max-w-md mx-auto">
+          <p className="text-humo max-w-md mx-auto">
             Elige una categoría y agrega tus platillos favoritos al carrito.
           </p>
         </div>
@@ -32,7 +32,7 @@ function Menu() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-neutral-400 mt-10">
+          <p className="text-center text-humo mt-10">
             No hay productos en esta categoría todavía.
           </p>
         )}

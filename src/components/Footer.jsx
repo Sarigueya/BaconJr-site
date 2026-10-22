@@ -20,19 +20,19 @@ const FOOTER_LINKS = {
 
 function Footer() {
   return (
-    <footer className="bg-neutral-900 text-white">
+    <footer className="bg-carbon text-crema">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <span className="text-xl font-bold tracking-tight">BACON JR.</span>
-            <p className="text-neutral-400 text-sm mt-3 leading-relaxed">
+            <span className="text-xl font-bold tracking-tight text-dorado">BACON JR.</span>
+            <p className="text-arena/70 text-sm mt-3 leading-relaxed">
               Asados al barril desde 1995. Sabor, tradición y calidad
               en cada corte.
             </p>
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-dorado">
               Menú
             </h4>
             <ul className="space-y-2">
@@ -40,7 +40,7 @@ function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
+                    className="text-sm text-arena/70 hover:text-llama transition-colors"
                   >
                     {link.label}
                   </a>
@@ -50,7 +50,7 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-dorado">
               Empresa
             </h4>
             <ul className="space-y-2">
@@ -58,7 +58,7 @@ function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
+                    className="text-sm text-arena/70 hover:text-llama transition-colors"
                   >
                     {link.label}
                   </a>
@@ -68,7 +68,7 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4 text-dorado">
               Soporte
             </h4>
             <ul className="space-y-2">
@@ -76,7 +76,7 @@ function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
+                    className="text-sm text-arena/70 hover:text-llama transition-colors"
                   >
                     {link.label}
                   </a>
@@ -87,9 +87,9 @@ function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-neutral-800">
+      <div className="border-t border-carbon-suave">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-humo">
             &copy; 2026 BACON JR. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-4">
