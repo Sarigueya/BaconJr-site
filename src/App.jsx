@@ -13,7 +13,7 @@ import { CartProvider } from './context/CartContext'
 function App() {
   return (
     <CartProvider>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-crema text-carbon">
         <Navbar />
         <main>
           <Hero />

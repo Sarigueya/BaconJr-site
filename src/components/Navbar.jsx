@@ -14,13 +14,13 @@ function Navbar() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-40 bg-white border-b border-neutral-200">
+    <nav className="sticky top-0 z-40 bg-crema border-b border-arena">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="p-2 -ml-2 text-neutral-600 hover:text-black transition-colors"
+              className="p-2 -ml-2 text-humo hover:text-fuego transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
               aria-expanded={isMenuOpen}
@@ -58,7 +58,7 @@ function Navbar() {
           <button
             type="button"
             onClick={() => setIsAuthModalOpen(true)}
-            className="inline-flex items-center px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
+            className="inline-flex items-center px-5 py-2 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
           >
             Ordena ahora
           </button>
@@ -66,13 +66,13 @@ function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-neutral-200 bg-white">
+        <div className="border-t border-arena bg-crema">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
             {NAV_LINKS.map((link) => (
               
                 <a key={link.href}
                 href={link.href}
-                className="block text-sm font-medium text-neutral-600 hover:text-black transition-colors"
+                className="block text-sm font-medium text-humo hover:text-fuego transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
