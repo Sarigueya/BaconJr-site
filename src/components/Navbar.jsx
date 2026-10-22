@@ -13,6 +13,11 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev)
+  const closeMenu = () => setIsMenuOpen(false)
+  const openAuthModal = () => setIsAuthModalOpen(true)
+  const closeAuthModal = () => setIsAuthModalOpen(false)
+
   return (
     <nav className="sticky top-0 z-40 bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,7 +26,7 @@ function Navbar() {
             <button
               type="button"
               className="p-2 -ml-2 text-neutral-600 hover:text-black transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={toggleMenu}
               aria-label="Toggle menu"
               aria-expanded={isMenuOpen}
             >
@@ -57,7 +62,7 @@ function Navbar() {
 
           <button
             type="button"
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={openAuthModal}
             className="inline-flex items-center px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
           >
             Ordena ahora
@@ -73,7 +78,7 @@ function Navbar() {
                 <a key={link.href}
                 href={link.href}
                 className="block text-sm font-medium text-neutral-600 hover:text-black transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={closeMenu}
               >
                 {link.label}
               </a>
@@ -82,7 +87,7 @@ function Navbar() {
         </div>
       )}
 
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
     </nav>
   )
 }
