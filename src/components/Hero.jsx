@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import LocationModal from './LocationModal'
+import heroBackground from '../assets/img/Hero-background.png'
 
 function Hero() {
   const [isLocationOpen, setIsLocationOpen] = useState(false)
 
   return (
-    <section className="relative bg-carbon text-crema">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+    <section
+      id="hero"
+      className="relative flex min-h-[80vh] items-center overflow-hidden bg-carbon bg-cover bg-center bg-no-repeat pt-[var(--navbar-height)] text-crema"
+      style={{ backgroundImage: `url(${heroBackground})` }}
+    >
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:pb-14 md:pb-20">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold tracking-widest uppercase text-dorado mb-4">
             Asados al Barril
@@ -21,7 +26,7 @@ function Hero() {
           <div className="flex flex-wrap gap-4">
             <a
               href="#menu"
-              className="inline-flex items-center px-6 py-3 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
+              className="inline-flex items-center px-6 py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
             >
               Pick up
             </a>
@@ -62,7 +67,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-carbon-suave to-carbon" />
+      <div className="absolute inset-0 bg-gradient-to-r from-carbon/90 via-carbon/70 to-carbon/30" />
 
       <LocationModal isOpen={isLocationOpen} onClose={() => setIsLocationOpen(false)} />
     </section>

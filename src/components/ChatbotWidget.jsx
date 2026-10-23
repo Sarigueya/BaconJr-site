@@ -24,6 +24,7 @@ function ChatbotWidget() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES)
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef(null)
+  const nextMessageId = useRef(2)
 
   const toggleChat = () => setIsOpen((prev) => !prev)
 
@@ -31,7 +32,11 @@ function ChatbotWidget() {
     const trimmed = text.trim()
     if (!trimmed) return
 
-    const userMessage = { id: Date.now(), sender: 'user', text: trimmed }
+    const userMessage = {
+      id: nextMessageId.current++,
+      sender: 'user',
+      text: trimmed,
+    }
     setMessages((prev) => [...prev, userMessage])
     setInputValue('')
 
@@ -39,7 +44,7 @@ function ChatbotWidget() {
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, sender: 'bot', text: MOCK_BOT_REPLY },
+        { id: nextMessageId.current++, sender: 'bot', text: MOCK_BOT_REPLY },
       ])
     }, 500)
   }
@@ -74,7 +79,7 @@ function ChatbotWidget() {
           aria-label="Asistente de BACON JR."
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-fuego text-white">
+          <div className="flex items-center justify-between px-4 py-3 bg-fuego text-carbon">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               <h2 className="text-sm font-bold tracking-wide">
@@ -84,7 +89,7 @@ function ChatbotWidget() {
             <button
               type="button"
               onClick={toggleChat}
-              className="p-1 text-white/80 hover:text-white transition-colors"
+              className="p-1 text-carbon/80 hover:text-carbon transition-colors"
               aria-label="Cerrar chat"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +108,7 @@ function ChatbotWidget() {
                 <div
                   className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-snug ${
                     message.sender === 'user'
-                      ? 'bg-fuego text-white rounded-br-sm'
+                      ? 'bg-fuego text-carbon rounded-br-sm'
                       : 'bg-white text-carbon border border-arena rounded-bl-sm'
                   }`}
                 >
@@ -121,7 +126,7 @@ function ChatbotWidget() {
                     key={reply}
                     type="button"
                     onClick={() => sendMessage(reply)}
-                    className="px-3 py-1.5 text-xs font-medium border border-arena rounded-full text-carbon hover:bg-fuego hover:text-white transition-colors"
+                    className="px-3 py-1.5 text-xs font-medium border border-arena rounded-full text-carbon hover:bg-fuego-oscuro hover:text-white transition-colors"
                   >
                     {reply}
                   </button>

@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import { useCart } from '../context/CartContext'
-
-function formatPrice(price) {
-  return `$${price}`
-}
+import { useCart } from '../context/cart-context'
+import { formatPrice } from '../utils/formatPrice'
 
 function CartButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -19,12 +16,12 @@ function CartButton() {
           aria-modal="true"
           aria-label="Carrito de compras"
         >
-          <div className="flex items-center justify-between px-4 py-3 bg-fuego text-white">
+          <div className="flex items-center justify-between px-4 py-3 bg-fuego text-carbon">
             <h2 className="text-sm font-bold tracking-wide">TU PEDIDO</h2>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1 text-white/80 hover:text-white transition-colors"
+              className="p-1 text-carbon/80 hover:text-carbon transition-colors"
               aria-label="Cerrar carrito"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +75,7 @@ function CartButton() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.id)}
-                      className="p-1 text-humo hover:text-fuego transition-colors"
+                      className="p-1 text-humo hover:text-fuego-oscuro transition-colors"
                       aria-label={`Quitar ${item.name} del carrito`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +96,7 @@ function CartButton() {
               </div>
               <button
                 type="button"
-                className="w-full py-3 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
+                className="w-full py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
               >
                 Continuar pedido
               </button>

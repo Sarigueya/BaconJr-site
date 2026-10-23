@@ -8,12 +8,12 @@ import HowToOrder from './components/HowToOrder'
 import Footer from './components/Footer'
 import ChatbotWidget from './components/ChatbotWidget'
 import CartButton from './components/CartButton'
-import { CartProvider } from './context/CartContext'
+import { CartProvider } from './context/CartProvider'
 
 function App() {
   return (
     <CartProvider>
-      <div className="min-h-screen bg-crema text-carbon">
+      <div className="min-h-screen bg-white text-carbon">
         <Navbar />
         <main>
           <Hero />

@@ -11,7 +11,7 @@ function CategoryFilters({ activeCategory, onChange }) {
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             activeCategory === category.id
                             ? 'bg-carbon text-dorado'
-              : 'bg-white text-humo border border-arena hover:border-fuego hover:text-fuego'
+              : 'bg-white text-humo border border-arena hover:border-fuego hover:text-fuego-oscuro'
           }`}
         >
           {category.label}

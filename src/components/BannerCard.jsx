@@ -1,6 +1,6 @@
 function BannerCard({ title, subtitle, cta }) {
   return (
-    <div className="shrink-0 snap-start w-screen">
+    <div className="shrink-0 w-screen">
       <div className="h-64 md:h-80 bg-carbon flex items-center">
         <div className="px-8 md:px-16 max-w-xl">
           <h2 className="text-crema text-2xl md:text-4xl font-bold">

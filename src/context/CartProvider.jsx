@@ -1,6 +1,5 @@
-import { createContext, useContext, useMemo, useState } from 'react'
-
-const CartContext = createContext(null)
+import { useMemo, useState } from 'react'
+import { CartContext } from './cart-context'
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]) // { id, name, price, quantity, image }
@@ -41,8 +40,6 @@ export function CartProvider({ children }) {
     setItems((prev) => prev.filter((item) => item.id !== productId))
   }
 
-  const clearCart = () => setItems([])
-
   const getQuantity = (productId) =>
     items.find((item) => item.id === productId)?.quantity ?? 0
 
@@ -62,19 +59,10 @@ export function CartProvider({ children }) {
     increment,
     decrement,
     removeItem,
-    clearCart,
     getQuantity,
     totalItems,
     totalPrice,
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
-}
-
-export function useCart() {
-  const context = useContext(CartContext)
-  if (!context) {
-    throw new Error('useCart debe usarse dentro de un <CartProvider>')
-  }
-  return context
 }

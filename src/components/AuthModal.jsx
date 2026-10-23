@@ -54,7 +54,7 @@ function AuthModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 -mr-1 text-humo hover:text-fuego transition-colors"
+            className="p-1 -mr-1 text-humo hover:text-fuego-oscuro transition-colors"
             aria-label="Cerrar"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,8 +71,8 @@ function AuthModal({ isOpen, onClose }) {
               onClick={() => setMode('login')}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 mode === 'login'
-                  ? 'bg-fuego text-white'
-                  : 'bg-white text-humo hover:text-fuego'
+                  ? 'bg-fuego text-carbon'
+                  : 'bg-white text-humo hover:text-fuego-oscuro'
               }`}
             >
               Ya soy cliente
@@ -82,8 +82,8 @@ function AuthModal({ isOpen, onClose }) {
               onClick={() => setMode('register')}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 mode === 'register'
-                  ? 'bg-fuego text-white'
-                  : 'bg-white text-humo hover:text-fuego'
+                  ? 'bg-fuego text-carbon'
+                  : 'bg-white text-humo hover:text-fuego-oscuro'
               }`}
             >
               Soy nuevo
@@ -149,7 +149,7 @@ function AuthModal({ isOpen, onClose }) {
             <div className="flex justify-end">
               <button
                 type="button"
-                className="text-xs font-medium text-humo hover:text-fuego transition-colors"
+                className="text-xs font-medium text-humo hover:text-fuego-oscuro transition-colors"
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -158,7 +158,7 @@ function AuthModal({ isOpen, onClose }) {
 
           <button
             type="submit"
-            className="w-full py-3 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
+            className="w-full py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
           >
             {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
           </button>

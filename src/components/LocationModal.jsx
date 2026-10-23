@@ -61,7 +61,7 @@ function LocationModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 -mr-1 text-humo hover:text-fuego transition-colors"
+            className="p-1 -mr-1 text-humo hover:text-fuego-oscuro transition-colors"
             aria-label="Cerrar"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,14 +127,14 @@ function LocationModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-humo hover:text-fuego transition-colors"
+            className="px-5 py-2 text-sm font-semibold text-humo hover:text-fuego-oscuro transition-colors"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
+            className="px-5 py-2 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
           >
             Confirmar
           </button>

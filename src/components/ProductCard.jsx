@@ -1,15 +1,12 @@
-import { useCart } from '../context/CartContext'
-
-function formatPrice(price) {
-  return `$${price}`
-}
+import { useCart } from '../context/cart-context'
+import { formatPrice } from '../utils/formatPrice'
 
 function ProductCard({ product }) {
   const { addItem, increment, decrement, getQuantity } = useCart()
   const quantity = getQuantity(product.id)
 
   return (
-    <div className="bg-white border border-arena rounded-lg overflow-hidden hover:shadow-lg hover:border-llama transition-all flex flex-col">
+    <div className="bg-white border border-arena rounded-lg overflow-hidden hover:shadow-lg hover:border-fuego transition-all flex flex-col">
       <div className="aspect-[4/3] bg-arena/50 flex items-center justify-center">
         <span className="text-humo text-sm">Imagen del producto</span>
       </div>
@@ -27,7 +24,7 @@ function ProductCard({ product }) {
             <button
               type="button"
               onClick={() => addItem(product)}
-              className="px-4 py-2 bg-fuego text-white text-sm font-semibold rounded-lg hover:bg-fuego-oscuro transition-colors"
+              className="px-4 py-2 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
             >
               Agregar
             </button>
@@ -36,7 +33,7 @@ function ProductCard({ product }) {
               <button
                 type="button"
                 onClick={() => decrement(product.id)}
-                className="w-7 h-7 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-fuego hover:text-white transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-fuego-oscuro hover:text-white transition-colors"
                 aria-label={`Quitar uno de ${product.name}`}
               >
                 −
@@ -47,7 +44,7 @@ function ProductCard({ product }) {
               <button
                 type="button"
                 onClick={() => increment(product.id)}
-                className="w-7 h-7 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-fuego hover:text-white transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-fuego-oscuro hover:text-white transition-colors"
                 aria-label={`Agregar uno más de ${product.name}`}
               >
                 +
