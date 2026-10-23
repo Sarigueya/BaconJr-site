@@ -1,3 +1,5 @@
+import restaurantImage from '../assets/img/restaurantepuntofisico.png'
+
 const STATS = [
   { value: '25+', label: 'Años de tradición' },
   { value: '100%', label: 'Carbón natural' },
@@ -9,8 +11,14 @@ function About() {
     <section id="about" className="bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="aspect-[4/3] bg-neutral-200 rounded-lg flex items-center justify-center">
-            <span className="text-neutral-400 text-sm">Imagen del restaurante</span>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-neutral-200">
+            <img
+              src={restaurantImage}
+              alt="Punto físico de Bacon Jr."
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           </div>
 
           <div>

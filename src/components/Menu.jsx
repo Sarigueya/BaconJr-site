@@ -28,9 +28,6 @@ function Menu() {
         {activeCategory !== null && (
           <>
             <div className="text-center mt-10 mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
-                Nuestro menú
-              </h2>
               <p className="text-humo max-w-md mx-auto">
                 Elige una categoría y agrega tus platillos favoritos al carrito.
               </p>
