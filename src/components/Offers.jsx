@@ -1,3 +1,7 @@
+import ofertaCostillas from '../assets/img/Oferta de costillas BBQ.png'
+import combofamiliar from '../assets/img/combofamiliar.png'
+import happyhour from '../assets/img/happyhour.png'
+
 const OFFERS = [
   {
     id: 1,
@@ -5,6 +9,7 @@ const OFFERS = [
     description: '2x1 en costillas BBQ todos los martes.',
     originalPrice: '$490',
     currentPrice: '$245',
+    image: ofertaCostillas,
   },
   {
     id: 2,
@@ -12,6 +17,7 @@ const OFFERS = [
     description: 'Ribeye + papas + ensalada para 4 personas.',
     originalPrice: '$890',
     currentPrice: '$690',
+    image: combofamiliar,
   },
   {
     id: 3,
@@ -19,14 +25,21 @@ const OFFERS = [
     description: '2x1 en bebidas de lunes a viernes 4-7pm.',
     originalPrice: '$120',
     currentPrice: '$60',
+    image: happyhour,
   },
 ]
 
 function OfferCard({ offer }) {
   return (
     <div className="bg-white border border-arena rounded-lg overflow-hidden hover:shadow-lg hover:border-brasa transition-all">
-      <div className="aspect-[16/9] bg-arena/50 flex items-center justify-center">
-        <span className="text-humo text-sm">Imagen de oferta</span>
+      <div className="relative aspect-square overflow-hidden bg-arena/50">
+        <img
+          src={offer.image}
+          alt={offer.title}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-contain"
+        />
       </div>
       <div className="p-5">
         <h3 className="text-lg font-semibold text-carbon mb-1">{offer.title}</h3>

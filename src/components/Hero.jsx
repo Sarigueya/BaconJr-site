@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import LocationModal from './LocationModal'
 import heroBackground from '../assets/img/Hero-background.png'
 
@@ -24,18 +25,18 @@ function Hero() {
             una tradición de generaciones puede dar.
           </p>
           <div className="flex flex-wrap gap-4">
-            <a
-              href="#menu"
+            <Link
+              to="/menu"
               className="inline-flex items-center px-6 py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
             >
               Pick up
-            </a>
-            <a
-              href="#menu"
+            </Link>
+            <Link
+              to="/menu"
               className="inline-flex items-center px-6 py-3 border border-dorado text-dorado text-sm font-semibold rounded-lg hover:bg-dorado hover:text-carbon transition-colors"
             >
               Delivery
-            </a>
+            </Link>
           </div>
 
           <div className="mt-8">

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import logo from '../assets/logos/logoBaconjrv2.svg'
 import AuthModal from './AuthModal'
 
 const NAV_LINKS = [
-  { label: 'Menu', href: '#menu' },
-  { label: 'Ofertas', href: '#offers' },
-  { label: 'Nosotros', href: '#about' },
+  { label: 'Menú', to: '/menu' },
+  { label: 'Ofertas', to: '/#offers' },
+  { label: 'Nosotros', to: '/#about' },
 ]
 
 function Navbar() {
@@ -13,6 +14,7 @@ function Navbar() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const navBarRef = useRef(null)
+  const location = useLocation()
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev)
   const closeMenu = () => setIsMenuOpen(false)
@@ -38,7 +40,7 @@ function Navbar() {
       window.removeEventListener('scroll', updateNavbar)
       window.removeEventListener('resize', updateNavbar)
     }
-  }, [])
+  }, [location.pathname])
 
   return (
     <nav
@@ -89,9 +91,9 @@ function Navbar() {
               </svg>
             </button>
 
-            <a href="#" className="flex shrink-0 items-center" aria-label="Bacon Jr. — Inicio">
+            <Link to="/" className="flex shrink-0 items-center" aria-label="Bacon Jr. — Inicio">
               <img src={logo} alt="Bacon Jr." className="h-12 w-auto sm:h-16" />
-            </a>
+            </Link>
           </div>
 
           <button
@@ -114,9 +116,9 @@ function Navbar() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
             {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
+              <Link
+                key={link.to}
+                to={link.to}
                 className={`block text-sm font-medium transition-colors ${
                   isScrolled
                     ? 'text-humo hover:text-fuego-oscuro'
@@ -125,7 +127,7 @@ function Navbar() {
                 onClick={closeMenu}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <button
               type="button"

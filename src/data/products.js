@@ -1,3 +1,17 @@
+import arrozverduras from '../assets/img/arrozverduras.png'
+import bbqsalsa from '../assets/img/bbqsalsa.png'
+import bebidacola from '../assets/img/bebidacola.png'
+import broenieconhelado from '../assets/img/broenieconhelado.png'
+import cervezaartesanal from '../assets/img/cervezaartesanal.png'
+import cheesecake from '../assets/img/cheesecake.png'
+import chimichurri from '../assets/img/chimichurri.png'
+import costillasbbq from '../assets/img/costillasbbq.png'
+import ensaladacesar from '../assets/img/ensaladacesar.png'
+import limonadanatural from '../assets/img/limonadanatural.png'
+import papasfrancesa from '../assets/img/papasfrancesa.png'
+import pechugaplancha from '../assets/img/pechugaplancha.png'
+import ribeye from '../assets/img/ribeye.png'
+
 export const PRODUCTS = [
   // Carnes
   {
@@ -6,6 +20,7 @@ export const PRODUCTS = [
     name: 'Ribeye a la parrilla',
     description: 'Corte premium de 300g, término a elección.',
     price: 320,
+    image: ribeye,
   },
   {
     id: 'meat-2',
@@ -13,6 +28,7 @@ export const PRODUCTS = [
     name: 'Costillas BBQ',
     description: 'Costillas de cerdo bañadas en salsa BBQ ahumada.',
     price: 245,
+    image: costillasbbq,
   },
   {
     id: 'meat-3',
@@ -20,6 +36,7 @@ export const PRODUCTS = [
     name: 'Pechuga a la plancha',
     description: 'Pechuga de pollo marinada con hierbas.',
     price: 180,
+    image: pechugaplancha,
   },
 
   // Bebidas
@@ -29,6 +46,7 @@ export const PRODUCTS = [
     name: 'Limonada natural',
     description: 'Limonada fresca preparada al momento.',
     price: 45,
+    image: limonadanatural,
   },
   {
     id: 'drink-2',
@@ -36,6 +54,7 @@ export const PRODUCTS = [
     name: 'Refresco de cola',
     description: 'Lata 355ml, bien fría.',
     price: 35,
+    image: bebidacola,
   },
   {
     id: 'drink-3',
@@ -43,6 +62,7 @@ export const PRODUCTS = [
     name: 'Cerveza artesanal',
     description: 'Botella 355ml, elaboración local.',
     price: 60,
+    image: cervezaartesanal,
   },
 
   // Postres
@@ -52,6 +72,7 @@ export const PRODUCTS = [
     name: 'Brownie con helado',
     description: 'Brownie tibio con bola de helado de vainilla.',
     price: 85,
+    image: broenieconhelado,
   },
   {
     id: 'dessert-2',
@@ -59,6 +80,7 @@ export const PRODUCTS = [
     name: 'Cheesecake de frutos rojos',
     description: 'Rebanada individual con salsa de frutos rojos.',
     price: 90,
+    image: cheesecake,
   },
 
   // Acompañantes
@@ -68,6 +90,7 @@ export const PRODUCTS = [
     name: 'Papas a la francesa',
     description: 'Porción clásica, crujientes por fuera.',
     price: 55,
+    image: papasfrancesa,
   },
   {
     id: 'side-2',
@@ -75,6 +98,7 @@ export const PRODUCTS = [
     name: 'Ensalada César',
     description: 'Lechuga romana, crutones y aderezo César.',
     price: 70,
+    image: ensaladacesar,
   },
   {
     id: 'side-3',
@@ -82,6 +106,7 @@ export const PRODUCTS = [
     name: 'Arroz con vegetales',
     description: 'Arroz salteado con vegetales de temporada.',
     price: 50,
+    image: arrozverduras,
   },
 
   // Salsas
@@ -91,6 +116,7 @@ export const PRODUCTS = [
     name: 'Salsa BBQ ahumada',
     description: 'Porción extra para acompañar tu corte.',
     price: 20,
+    image: bbqsalsa,
   },
   {
     id: 'sauce-2',
@@ -98,6 +124,7 @@ export const PRODUCTS = [
     name: 'Chimichurri',
     description: 'Receta clásica con perejil y ajo.',
     price: 20,
+    image: chimichurri,
   },
 ]
 

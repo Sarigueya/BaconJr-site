@@ -7,8 +7,14 @@ function ProductCard({ product }) {
 
   return (
     <div className="bg-white border border-arena rounded-lg overflow-hidden hover:shadow-lg hover:border-fuego transition-all flex flex-col">
-      <div className="aspect-[4/3] bg-arena/50 flex items-center justify-center">
-        <span className="text-humo text-sm">Imagen del producto</span>
+      <div className="relative aspect-[4/3] overflow-hidden bg-arena/50">
+        <img
+          src={product.image}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       </div>
 
       <div className="p-5 flex flex-col flex-1">

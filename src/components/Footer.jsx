@@ -1,12 +1,14 @@
+import { Link } from 'react-router-dom'
+
 const FOOTER_LINKS = {
   menu: [
-    { label: 'Cortes', href: '#menu' },
-    { label: 'Costillas', href: '#menu' },
-    { label: 'Pollo', href: '#menu' },
-    { label: 'Acompañamientos', href: '#menu' },
+    { label: 'Cortes', href: '/menu' },
+    { label: 'Costillas', href: '/menu' },
+    { label: 'Pollo', href: '/menu' },
+    { label: 'Acompañamientos', href: '/menu' },
   ],
   company: [
-    { label: 'Nuestra Historia', href: '#about' },
+    { label: 'Nuestra Historia', href: '/#about' },
     { label: 'Empleo', href: '#' },
     { label: 'Prensa', href: '#' },
   ],
@@ -16,6 +18,24 @@ const FOOTER_LINKS = {
     { label: 'Privacidad', href: '#' },
     { label: 'Términos', href: '#' },
   ],
+}
+
+function FooterLink({ href, children }) {
+  const className = 'text-sm text-arena/70 hover:text-llama transition-colors'
+
+  if (href.startsWith('/')) {
+    return (
+      <Link to={href} className={className}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  )
 }
 
 function Footer() {
@@ -38,12 +58,7 @@ function Footer() {
             <ul className="space-y-2">
               {FOOTER_LINKS.menu.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-arena/70 hover:text-llama transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
@@ -56,12 +71,7 @@ function Footer() {
             <ul className="space-y-2">
               {FOOTER_LINKS.company.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-arena/70 hover:text-llama transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
@@ -74,12 +84,7 @@ function Footer() {
             <ul className="space-y-2">
               {FOOTER_LINKS.support.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-arena/70 hover:text-llama transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
