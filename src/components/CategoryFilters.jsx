@@ -1,19 +1,13 @@
 import { CATEGORIES } from '../data/products'
-import combofamiliar from '../assets/img/combofamiliar.png'
-import ribeye from '../assets/img/ribeye.png'
-import limonadanatural from '../assets/img/limonadanatural.png'
-import cheesecake from '../assets/img/cheesecake.png'
-import papasfrancesa from '../assets/img/papasfrancesa.png'
-import bbqsalsa from '../assets/img/bbqsalsa.png'
 
-// Foto y color de cada categoría. Para cambiar una, edítala aquí.
+// Color de cada categoría. Las fotos están en src/data/products.js.
 const CATEGORY_STYLES = {
-  all: { image: combofamiliar, card: 'bg-carbon text-dorado' },
-  meats: { image: ribeye, card: 'bg-brasa text-crema' },
-  drinks: { image: limonadanatural, card: 'bg-fuego-oscuro text-crema' },
-  desserts: { image: cheesecake, card: 'bg-roble text-crema' },
-  sides: { image: papasfrancesa, card: 'bg-dorado text-carbon' },
-  sauces: { image: bbqsalsa, card: 'bg-fuego-profundo text-crema' },
+  all: { card: 'bg-carbon text-dorado' },
+  meats: { card: 'bg-brasa text-crema' },
+  drinks: { card: 'bg-fuego-oscuro text-crema' },
+  desserts: { card: 'bg-roble text-crema' },
+  sides: { card: 'bg-dorado text-carbon' },
+  sauces: { card: 'bg-fuego-profundo text-crema' },
 }
 
 function CategoryFilters({ activeCategory, onChange, variant = 'menu' }) {
@@ -41,7 +35,7 @@ function CategoryFilters({ activeCategory, onChange, variant = 'menu' }) {
           >
             <span className="block h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/25 sm:h-20 sm:w-20">
               <img
-                src={style.image}
+                src={category.image}
                 alt=""
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"

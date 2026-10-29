@@ -1,3 +1,4 @@
+import combofamiliar from '../assets/img/combofamiliar.png'
 import arrozverduras from '../assets/img/arrozverduras.png'
 import bbqsalsa from '../assets/img/bbqsalsa.png'
 import bebidacola from '../assets/img/bebidacola.png'
@@ -129,10 +130,10 @@ export const PRODUCTS = [
 ]
 
 export const CATEGORIES = [
-  { id: 'all', label: 'Todos' },
-  { id: 'meats', label: 'Carnes' },
-  { id: 'drinks', label: 'Bebidas' },
-  { id: 'desserts', label: 'Postres' },
-  { id: 'sides', label: 'Acompañantes' },
-  { id: 'sauces', label: 'Salsas' },
+  { id: 'all', label: 'Todos', image: combofamiliar },
+  { id: 'meats', label: 'Carnes', image: ribeye },
+  { id: 'drinks', label: 'Bebidas', image: limonadanatural },
+  { id: 'desserts', label: 'Postres', image: cheesecake },
+  { id: 'sides', label: 'Acompañantes', image: papasfrancesa },
+  { id: 'sauces', label: 'Salsas', image: bbqsalsa },
 ]

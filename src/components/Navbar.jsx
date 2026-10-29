@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import logo from '../assets/logos/logoBaconjrv2.svg'
 import AuthModal from './AuthModal'
+import MobileMenu from './MobileMenu'
 
 const NAV_LINKS = [
   { label: 'Menú', to: '/menu' },
@@ -18,7 +19,7 @@ function Navbar() {
   const location = useLocation()
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev)
-  const closeMenu = () => setIsMenuOpen(false)
+  const closeMenu = useCallback(() => setIsMenuOpen(false), [])
   const openAuthModal = () => setIsAuthModalOpen(true)
   const closeAuthModal = () => setIsAuthModalOpen(false)
 
@@ -86,27 +87,11 @@ function Navbar() {
     setIsPastMenuFilters(true)
   }, [location.pathname])
 
-  useEffect(() => {
-    closeMenu()
-  }, [location.pathname])
-
   const useDarkOnMenu = isMenuPage && !isPastMenuFilters
   const isLight = useDarkOnMenu ? false : isPastHero
   const isFixed = isMenuPage || isPastHero
 
   const getLinkColor = (isActive) => {
-    if (useDarkOnMenu) {
-      return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
-    }
-    if (isLight) {
-      return isActive
-        ? 'text-fuego-oscuro'
-        : 'text-humo hover:text-fuego-oscuro'
-    }
-    return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
-  }
-
-  const getMobileLinkColor = (isActive) => {
     if (useDarkOnMenu) {
       return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
     }
@@ -211,32 +196,7 @@ function Navbar() {
         </div>
       </div>
 
-      {isMenuOpen && (
-        <div
-          className={`md:hidden border-t transition-colors duration-300 ${
-            useDarkOnMenu
-              ? 'border-white/10 bg-carbon'
-              : isLight
-                ? 'border-arena bg-white'
-                : 'border-white/10 bg-carbon/95'
-          }`}
-        >
-          <div className="mx-auto max-w-7xl space-y-1 px-4 py-3 sm:px-6 lg:px-8">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `block rounded-md px-2 py-2 text-sm font-medium transition-colors ${getMobileLinkColor(isActive)}`
-                }
-                onClick={closeMenu}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      )}
+      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} onOrder={openAuthModal} />
 
       <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
     </nav>
