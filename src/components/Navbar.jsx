@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import logo from '../assets/logos/logoBaconjrv2.svg'
 import AuthModal from './AuthModal'
 
@@ -12,7 +12,8 @@ const NAV_LINKS = [
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [isPastHero, setIsPastHero] = useState(false)
+  const [isPastMenuFilters, setIsPastMenuFilters] = useState(false)
   const navBarRef = useRef(null)
   const location = useLocation()
 
@@ -21,57 +22,138 @@ function Navbar() {
   const openAuthModal = () => setIsAuthModalOpen(true)
   const closeAuthModal = () => setIsAuthModalOpen(false)
 
+  const isMenuPage = location.pathname === '/menu'
+
   useEffect(() => {
-    const updateNavbar = () => {
-      const hero = document.getElementById('hero')
+    const hero = document.getElementById('hero')
+
+    if (hero) {
+      setIsPastHero(false)
+
       const navHeight = navBarRef.current?.offsetHeight ?? 80
-      const heroBottom = hero
-        ? hero.offsetTop + hero.offsetHeight
-        : window.innerHeight
 
-      setIsScrolled(window.scrollY > heroBottom - navHeight)
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) return
+          const hasPassed =
+            !entry.isIntersecting || entry.boundingClientRect.bottom <= navHeight
+          setIsPastHero(hasPassed)
+        },
+        {
+          threshold: [0, 0.01],
+          rootMargin: `-${navHeight}px 0px 0px 0px`,
+        }
+      )
+
+      observer.observe(hero)
+
+      return () => {
+        observer.disconnect()
+      }
     }
 
-    updateNavbar()
-    window.addEventListener('scroll', updateNavbar, { passive: true })
-    window.addEventListener('resize', updateNavbar)
-
-    return () => {
-      window.removeEventListener('scroll', updateNavbar)
-      window.removeEventListener('resize', updateNavbar)
-    }
+    setIsPastHero(true)
   }, [location.pathname])
+
+  useEffect(() => {
+    const menuFilters = document.getElementById('menu-filters')
+
+    if (isMenuPage && menuFilters) {
+      setIsPastMenuFilters(false)
+
+      const navHeight = navBarRef.current?.offsetHeight ?? 80
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) return
+          const hasPassed =
+            !entry.isIntersecting || entry.boundingClientRect.bottom <= navHeight
+          setIsPastMenuFilters(hasPassed)
+        },
+        {
+          threshold: [0, 0.01],
+          rootMargin: `-${navHeight}px 0px 0px 0px`,
+        }
+      )
+
+      observer.observe(menuFilters)
+
+      return () => {
+        observer.disconnect()
+      }
+    }
+
+    setIsPastMenuFilters(true)
+  }, [location.pathname])
+
+  useEffect(() => {
+    closeMenu()
+  }, [location.pathname])
+
+  const useDarkOnMenu = isMenuPage && !isPastMenuFilters
+  const isLight = useDarkOnMenu ? false : isPastHero
+  const isFixed = isMenuPage || isPastHero
+
+  const getLinkColor = (isActive) => {
+    if (useDarkOnMenu) {
+      return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
+    }
+    if (isLight) {
+      return isActive
+        ? 'text-fuego-oscuro'
+        : 'text-humo hover:text-fuego-oscuro'
+    }
+    return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
+  }
+
+  const getMobileLinkColor = (isActive) => {
+    if (useDarkOnMenu) {
+      return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
+    }
+    if (isLight) {
+      return isActive
+        ? 'text-fuego-oscuro'
+        : 'text-humo hover:text-fuego-oscuro'
+    }
+    return isActive ? 'text-dorado' : 'text-crema hover:text-dorado'
+  }
 
   return (
     <nav
-      className={`fixed inset-x-0 top-0 z-40 border-b transition-colors duration-300 ${
-        isScrolled
-          ? 'border-arena bg-white/95 shadow-sm backdrop-blur'
-          : 'border-transparent bg-transparent'
+      ref={navBarRef}
+      className={`inset-x-0 top-0 z-40 border-b transition-colors duration-300 ${
+        isFixed ? 'fixed' : 'absolute'
+      } ${
+        useDarkOnMenu
+          ? 'border-transparent bg-carbon'
+          : isLight
+            ? 'border-arena bg-white/95 shadow-sm backdrop-blur'
+            : 'border-transparent bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           ref={navBarRef}
-          className="flex items-center justify-between h-[var(--navbar-height)]"
+          className="flex h-[var(--navbar-height)] items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <button
               type="button"
-              className={`p-2 -ml-2 transition-colors ${
-                isScrolled
-                  ? 'text-humo hover:text-fuego-oscuro'
-                  : 'text-white hover:text-dorado'
+              className={`md:hidden p-2 -ml-2 transition-colors ${
+                useDarkOnMenu || !isLight
+                  ? 'text-crema hover:text-dorado'
+                  : 'text-humo hover:text-fuego-oscuro'
               }`}
               onClick={toggleMenu}
-              aria-label="Toggle menu"
+              aria-label="Abrir menú de navegación"
               aria-expanded={isMenuOpen}
             >
               <svg
-                className="w-7 h-7"
+                className="h-7 w-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 {isMenuOpen ? (
                   <path
@@ -91,54 +173,67 @@ function Navbar() {
               </svg>
             </button>
 
-            <Link to="/" className="flex shrink-0 items-center" aria-label="Bacon Jr. — Inicio">
-              <img src={logo} alt="Bacon Jr." className="h-12 w-auto sm:h-16" />
+            <Link
+              to="/"
+              className="flex shrink-0 items-center"
+              aria-label="Bacon Jr. — Inicio"
+            >
+              <img src={logo} alt="Bacon Jr." className="h-12 w-auto sm:h-14 md:h-16" />
             </Link>
           </div>
 
-          <button
-            type="button"
-            onClick={openAuthModal}
-            className="hidden sm:inline-flex items-center px-6 py-2.5 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
+          <nav
+            className="hidden md:flex flex-1 items-center justify-evenly mx-4 lg:mx-10"
+            aria-label="Navegación principal"
           >
-            Ordena ahora
-          </button>
+            {NAV_LINKS.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors ${getLinkColor(isActive)}`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex shrink-0 items-center justify-end">
+            <button
+              type="button"
+              onClick={openAuthModal}
+              className="inline-flex items-center rounded-lg bg-fuego-oscuro px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-fuego-profundo sm:px-5 sm:py-2.5 sm:text-sm"
+            >
+              Ordena ahora
+            </button>
+          </div>
         </div>
       </div>
 
       {isMenuOpen && (
         <div
-          className={`border-t transition-colors duration-300 ${
-            isScrolled
-              ? 'border-arena bg-white'
-              : 'border-white/10 bg-carbon/95 backdrop-blur'
+          className={`md:hidden border-t transition-colors duration-300 ${
+            useDarkOnMenu
+              ? 'border-white/10 bg-carbon'
+              : isLight
+                ? 'border-arena bg-white'
+                : 'border-white/10 bg-carbon/95'
           }`}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+          <div className="mx-auto max-w-7xl space-y-1 px-4 py-3 sm:px-6 lg:px-8">
             {NAV_LINKS.map((link) => (
-              <Link
+              <NavLink
                 key={link.to}
                 to={link.to}
-                className={`block text-sm font-medium transition-colors ${
-                  isScrolled
-                    ? 'text-humo hover:text-fuego-oscuro'
-                    : 'text-crema hover:text-dorado'
-                }`}
+                className={({ isActive }) =>
+                  `block rounded-md px-2 py-2 text-sm font-medium transition-colors ${getMobileLinkColor(isActive)}`
+                }
                 onClick={closeMenu}
               >
                 {link.label}
-              </Link>
+              </NavLink>
             ))}
-            <button
-              type="button"
-              onClick={() => {
-                closeMenu()
-                openAuthModal()
-              }}
-              className="w-full px-4 py-2.5 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors sm:hidden"
-            >
-              Ordena ahora
-            </button>
           </div>
         </div>
       )}

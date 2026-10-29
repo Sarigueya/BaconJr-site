@@ -20,10 +20,12 @@ function Menu() {
   return (
     <section id="menu" className="bg-white py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CategoryFilters
-          activeCategory={activeCategory}
-          onChange={(category) => setSearchParams({ category })}
-        />
+        <div id="menu-filters" className="mb-8">
+          <CategoryFilters
+            activeCategory={activeCategory}
+            onChange={(category) => setSearchParams({ category })}
+          />
+        </div>
 
         {activeCategory !== null && (
           <>
