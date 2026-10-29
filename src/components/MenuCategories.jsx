@@ -7,7 +7,7 @@ function MenuCategories() {
   return (
     <section
       aria-label="Categorías del menú"
-      className="relative isolate overflow-hidden border-y border-arena/80 bg-crema py-12 md:py-20"
+      className="relative isolate overflow-hidden border-y border-arena/80 bg-crema py-8 md:py-12"
     >
       <div
         aria-hidden="true"

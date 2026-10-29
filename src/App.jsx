@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ChatbotWidget from './components/ChatbotWidget'
 import CartButton from './components/CartButton'
+import DailyOfferModal from './components/DailyOfferModal'
 import ScrollManager from './components/ScrollManager'
 import HomePage from './pages/HomePage'
 import MenuPage from './pages/MenuPage'
@@ -24,6 +25,7 @@ function App() {
         <Footer />
         <ChatbotWidget />
         <CartButton />
+        <DailyOfferModal />
       </div>
     </CartProvider>
   )
