@@ -40,6 +40,8 @@ export function CartProvider({ children }) {
     setItems((prev) => prev.filter((item) => item.id !== productId))
   }
 
+  const clearCart = () => setItems([])
+
   const getQuantity = (productId) =>
     items.find((item) => item.id === productId)?.quantity ?? 0
 
@@ -59,6 +61,7 @@ export function CartProvider({ children }) {
     increment,
     decrement,
     removeItem,
+    clearCart,
     getQuantity,
     totalItems,
     totalPrice,
