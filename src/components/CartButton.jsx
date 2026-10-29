@@ -1,10 +1,32 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
+import InvoiceModal from './InvoiceModal'
 
 function CartButton() {
   const [isOpen, setIsOpen] = useState(false)
+  const [order, setOrder] = useState(null) // foto del pedido mostrada en la factura
   const { items, increment, decrement, removeItem, totalItems, totalPrice } = useCart()
+  const navigate = useNavigate()
+
+  const openInvoice = () => {
+    setOrder({
+      number: `BJ-${String(Date.now()).slice(-5)}`,
+      date: new Date().toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }),
+      items: items.map((item) => ({ ...item })),
+      totalItems,
+      total: totalPrice,
+    })
+    setIsOpen(false)
+  }
+
+  const closeInvoice = () => setOrder(null)
+
+  const goToMenu = () => {
+    setOrder(null)
+    navigate('/menu?category=all')
+  }
 
   return (
     <>
@@ -96,9 +118,10 @@ function CartButton() {
               </div>
               <button
                 type="button"
+                onClick={openInvoice}
                 className="w-full py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
               >
-                Continuar pedido
+                Ver factura y confirmar
               </button>
             </div>
           )}
@@ -126,6 +149,10 @@ function CartButton() {
           </span>
         )}
       </button>
+
+      {order && (
+        <InvoiceModal order={order} onClose={closeInvoice} onGoToMenu={goToMenu} />
+      )}
     </>
   )
 }
