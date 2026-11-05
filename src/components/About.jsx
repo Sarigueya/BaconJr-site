@@ -1,4 +1,4 @@
-import restaurantImage from '../assets/img/restaurantepuntofisico.png'
+import restaurantImage from '../assets/about/restaurantepuntofisico.png'
 
 const STATS = [
   { value: '30+', label: 'Años de tradición' },

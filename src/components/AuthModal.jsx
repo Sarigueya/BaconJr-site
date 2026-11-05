@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 function AuthModal({ isOpen, onClose }) {
   const [mode, setMode] = useState('login') // 'login' | 'register'
+
+  useBodyScrollLock(isOpen)
 
   useEffect(() => {
     if (!isOpen) return
@@ -11,11 +15,9 @@ function AuthModal({ isOpen, onClose }) {
     }
 
     document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
 
     return () => {
       document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
     }
   }, [isOpen, onClose])
 
@@ -27,16 +29,16 @@ function AuthModal({ isOpen, onClose }) {
     onClose()
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Iniciar sesión o registrarse"
     >
       <div
-        className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
+        className="my-auto max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
@@ -193,7 +195,8 @@ function AuthModal({ isOpen, onClose }) {
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

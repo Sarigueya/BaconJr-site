@@ -1,10 +1,22 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import LocationModal from './LocationModal'
-import heroBackground from '../assets/img/Hero-background.png'
+import LocationModal, { LOCATION_STORAGE_KEY } from './LocationModal'
+import heroBackground from '../assets/hero/hero-background.png'
+
+const readStoredLocation = () => {
+  try {
+    const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return typeof parsed?.lat === 'number' ? parsed : null
+  } catch {
+    return null
+  }
+}
 
 function Hero() {
   const [isLocationOpen, setIsLocationOpen] = useState(false)
+  const [userLocation, setUserLocation] = useState(readStoredLocation)
 
   return (
     <section
@@ -26,14 +38,14 @@ function Hero() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
-              to="/menu"
-              className="inline-flex items-center px-6 py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
+              to="/menu?category=all"
+              className="inline-flex cursor-pointer items-center rounded-lg bg-fuego-oscuro px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               Pick up
             </Link>
             <Link
-              to="/menu"
-              className="inline-flex items-center px-6 py-3 border border-dorado text-dorado text-sm font-semibold rounded-lg hover:bg-dorado hover:text-carbon transition-colors"
+              to="/menu?category=all"
+              className="inline-flex cursor-pointer items-center rounded-lg border border-dorado px-6 py-3 text-sm font-semibold text-dorado transition-all duration-200 hover:-translate-y-0.5 hover:bg-dorado hover:text-carbon hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               Delivery
             </Link>
@@ -43,13 +55,14 @@ function Hero() {
             <button
               type="button"
               onClick={() => setIsLocationOpen(true)}
-              className="flex items-center w-full max-w-md bg-white/10 backdrop-blur border border-white/20 rounded-full px-5 py-3 text-left hover:bg-white/15 transition-colors"
+              className="flex w-full max-w-md cursor-pointer items-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-left backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-dorado/60 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               <svg
-                className="w-5 h-5 text-llama mr-3 shrink-0"
+                className="mr-3 w-5 h-5 shrink-0 text-llama"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -59,10 +72,23 @@ function Hero() {
                 />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-sm text-arena">¿Dónde te encuentras?</span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm text-arena">
+                  {userLocation
+                    ? `Entregar en ${userLocation.address?.split(',')[0] ?? 'tu ubicación'}`
+                    : '¿Dónde te encuentras?'}
+                </span>
+                {userLocation?.storeName && (
+                  <span className="mt-0.5 block truncate text-[11px] text-dorado">
+                    Sucursal: {userLocation.storeName}
+                  </span>
+                )}
+              </span>
             </button>
-            <p className="text-xs text-arena/70 mt-2">
-              Encuentra tu Bacon Jr. más cercano.
+            <p className="mt-2 text-xs text-arena/70">
+              {userLocation
+                ? 'Haz clic para cambiar tu ubicación de entrega.'
+                : 'Encuentra tu Bacon Jr. más cercano.'}
             </p>
           </div>
         </div>
@@ -70,7 +96,11 @@ function Hero() {
 
       <div className="absolute inset-0 bg-gradient-to-r from-carbon/90 via-carbon/70 to-carbon/30" />
 
-      <LocationModal isOpen={isLocationOpen} onClose={() => setIsLocationOpen(false)} />
+      <LocationModal
+        isOpen={isLocationOpen}
+        onClose={() => setIsLocationOpen(false)}
+        onConfirm={setUserLocation}
+      />
     </section>
   )
 }

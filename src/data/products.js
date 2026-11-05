@@ -1,17 +1,19 @@
-import combofamiliar from '../assets/img/combofamiliar.png'
-import arrozverduras from '../assets/img/arrozverduras.png'
-import bbqsalsa from '../assets/img/bbqsalsa.png'
-import bebidacola from '../assets/img/bebidacola.png'
-import broenieconhelado from '../assets/img/broenieconhelado.png'
-import cervezaartesanal from '../assets/img/cervezaartesanal.png'
-import cheesecake from '../assets/img/cheesecake.png'
-import chimichurri from '../assets/img/chimichurri.png'
-import costillasbbq from '../assets/img/costillasbbq.png'
-import ensaladacesar from '../assets/img/ensaladacesar.png'
-import limonadanatural from '../assets/img/limonadanatural.png'
-import papasfrancesa from '../assets/img/papasfrancesa.png'
-import pechugaplancha from '../assets/img/pechugaplancha.png'
-import ribeye from '../assets/img/ribeye.png'
+import combofamiliar from '../assets/offers/combo-familiar.png'
+import arrozverduras from '../assets/menu/arrozverduras.png'
+import bbqsalsa from '../assets/menu/bbqsalsa.png'
+import bebidacola from '../assets/menu/bebidacola.png'
+import broenieconhelado from '../assets/menu/broenieconhelado.png'
+import cervezaartesanal from '../assets/menu/cervezaartesanal.png'
+import cheesecake from '../assets/menu/cheesecake.png'
+import chimichurri from '../assets/menu/chimichurri.png'
+import costillasbbq from '../assets/menu/costillasbbq.png'
+import ensaladacesar from '../assets/menu/ensaladacesar.png'
+import limonadanatural from '../assets/menu/limonadanatural.png'
+import papasfrancesa from '../assets/menu/papasfrancesa.png'
+import pechugaplancha from '../assets/menu/pechugaplancha.png'
+import piñasada from '../assets/menu/piñasada.png'
+import ribeye from '../assets/menu/ribeye.png'
+import salsahumo from '../assets/menu/salsahumo.png'
 
 export const PRODUCTS = [
   // Carnes
@@ -83,6 +85,14 @@ export const PRODUCTS = [
     price: 90,
     image: cheesecake,
   },
+  {
+    id: 'dessert-3',
+    category: 'desserts',
+    name: 'Piña Asada',
+    description: 'Piña fresca asada a la parrilla, caramelizada con un toque de canela.',
+    price: 75,
+    image: piñasada,
+  },
 
   // Acompañantes
   {
@@ -126,6 +136,14 @@ export const PRODUCTS = [
     description: 'Receta clásica con perejil y ajo.',
     price: 20,
     image: chimichurri,
+  },
+  {
+    id: 'sauce-3',
+    category: 'sauces',
+    name: 'Salsa de humo',
+    description: 'Salsa casera con ahumado de leña, ideal para tus cortes.',
+    price: 20,
+    image: salsahumo,
   },
 ]
 

@@ -60,53 +60,61 @@ function CartButton() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-crema">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between bg-white border border-arena rounded-lg px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-carbon truncate">{item.name}</p>
-                    <p className="text-xs text-humo">
-                      {formatPrice(item.price)} c/u
-                    </p>
-                  </div>
+              {items.map((item) => {
+                const lineId = item.lineId ?? item.id
+                return (
+                  <div
+                    key={lineId}
+                    className="flex items-center justify-between bg-white border border-arena rounded-lg px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-carbon truncate">{item.name}</p>
+                      <p className="text-xs text-humo">
+                        {formatPrice(item.price)} c/u
+                      </p>
+                      {item.note && (
+                        <p className="mt-1 text-xs italic text-fuego-oscuro line-clamp-2">
+                          Nota: {item.note}
+                        </p>
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-1.5 bg-crema rounded-lg px-1.5 py-1">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 bg-crema rounded-lg px-1.5 py-1">
+                        <button
+                          type="button"
+                          onClick={() => decrement(lineId)}
+                          className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
+                          aria-label={`Quitar uno de ${item.name}`}
+                        >
+                          −
+                        </button>
+                        <span className="text-xs font-semibold text-carbon w-4 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => increment(lineId)}
+                          className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
+                          aria-label={`Agregar uno más de ${item.name}`}
+                        >
+                          +
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => decrement(item.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
-                        aria-label={`Quitar uno de ${item.name}`}
+                        onClick={() => removeItem(lineId)}
+                        className="p-1 text-humo hover:text-fuego-oscuro transition-colors"
+                        aria-label={`Quitar ${item.name} del carrito`}
                       >
-                        −
-                      </button>
-                      <span className="text-xs font-semibold text-carbon w-4 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => increment(item.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
-                        aria-label={`Agregar uno más de ${item.name}`}
-                      >
-                        +
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="p-1 text-humo hover:text-fuego-oscuro transition-colors"
-                      aria-label={`Quitar ${item.name} del carrito`}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 

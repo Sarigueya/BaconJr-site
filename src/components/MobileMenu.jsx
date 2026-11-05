@@ -1,18 +1,28 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
-import logo from '../assets/logos/logoBaconjrv2.svg'
+import logo from '../assets/brand/logoBaconjrv2.svg'
 import { CATEGORIES } from '../data/products'
+import { scrollToSection } from '../utils/scrollToSection'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 const MAIN_LINKS = [
   { label: 'Inicio', to: '/', isActive: (loc) => loc.pathname === '/' && !loc.hash },
   { label: 'Menú', to: '/menu', isActive: (loc) => loc.pathname === '/menu' },
-  { label: 'Ofertas', to: '/#offers', isActive: (loc) => loc.hash === '#offers' },
-  { label: 'Nosotros', to: '/#about', isActive: (loc) => loc.hash === '#about' },
+  { label: 'Ofertas', to: '/#offers', section: 'offers', isActive: (loc) => loc.hash === '#offers' },
+  { label: 'Nosotros', to: '/#about', section: 'about', isActive: (loc) => loc.hash === '#about' },
 ]
 
 function MobileMenu({ isOpen, onClose, onOrder }) {
   const location = useLocation()
+
+  useBodyScrollLock(isOpen)
+
+  const handleLinkClick = (event, section) => {
+    if (!section || location.pathname !== '/') return
+    event.preventDefault()
+    window.setTimeout(() => scrollToSection(section), 80)
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -20,10 +30,8 @@ function MobileMenu({ isOpen, onClose, onOrder }) {
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
     }
   }, [isOpen, onClose])
 
@@ -72,11 +80,14 @@ function MobileMenu({ isOpen, onClose, onOrder }) {
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      onClick={onClose}
-                      className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-base font-semibold transition-colors ${
+                      onClick={(event) => {
+                        handleLinkClick(event, link.section)
+                        onClose()
+                      }}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-base font-semibold transition-all duration-200 ${
                         active
                           ? 'bg-white/10 text-dorado'
-                          : 'text-crema hover:bg-white/5 hover:text-dorado'
+                          : 'text-crema hover:translate-x-0.5 hover:bg-white/5 hover:text-dorado'
                       }`}
                     >
                       {link.label}

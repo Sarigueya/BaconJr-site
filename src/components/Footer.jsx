@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import logo from '../assets/logos/logoBaconjrv2.svg'
+import logo from '../assets/brand/logoBaconjrv2.svg'
 import SocialLinks from './SocialLinks'
 
 const FOOTER_LINKS = [
@@ -18,8 +18,6 @@ const FOOTER_LINKS = [
     links: [
       { label: 'Nuestra historia', href: '/#about' },
       { label: 'Ofertas del día', href: '/#offers' },
-      { label: 'Trabaja con nosotros', href: '#' },
-      { label: 'Contacto', href: '#' },
     ],
   },
 ]
@@ -55,25 +53,11 @@ const CONTACT_INFO = [
   },
 ]
 
-const LEGAL_LINKS = [
-  { label: 'Preguntas frecuentes', href: '#' },
-  { label: 'Privacidad', href: '#' },
-  { label: 'Términos', href: '#' },
-]
-
 function FooterLink({ href, className, children }) {
-  if (href.startsWith('/')) {
-    return (
-      <Link to={href} className={className}>
-        {children}
-      </Link>
-    )
-  }
-
   return (
-    <a href={href} className={className}>
+    <Link to={href} className={className}>
       {children}
-    </a>
+    </Link>
   )
 }
 
@@ -197,22 +181,10 @@ function Footer() {
 
       {/* Barra inferior */}
       <div className="border-t border-crema/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 text-center sm:px-6 md:flex-row lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 text-center sm:px-6 lg:px-8">
           <p className="text-xs text-humo">
             &copy; {new Date().getFullYear()} BACON JR. Todos los derechos reservados.
           </p>
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            {LEGAL_LINKS.map((link) => (
-              <li key={link.label}>
-                <FooterLink
-                  href={link.href}
-                  className="text-xs text-humo transition-colors hover:text-dorado"
-                >
-                  {link.label}
-                </FooterLink>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </footer>

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import logo from '../assets/logos/logoBaconjrv2.svg'
+import logo from '../assets/brand/logoBaconjrv2.svg'
 import AuthModal from './AuthModal'
 import MobileMenu from './MobileMenu'
+import { scrollToSection } from '../utils/scrollToSection'
 
 const NAV_LINKS = [
   { label: 'Menú', to: '/menu' },
-  { label: 'Ofertas', to: '/#offers' },
-  { label: 'Nosotros', to: '/#about' },
+  { label: 'Ofertas', to: '/#offers', section: 'offers' },
+  { label: 'Nosotros', to: '/#about', section: 'about' },
 ]
 
 function Navbar() {
@@ -25,10 +26,20 @@ function Navbar() {
 
   const isMenuPage = location.pathname === '/menu'
 
+  const handleSectionClick = (event, section) => {
+    if (!section) return
+    if (location.pathname === '/') {
+      event.preventDefault()
+      scrollToSection(section)
+    }
+  }
+
   useEffect(() => {
     const hero = document.getElementById('hero')
 
     if (hero) {
+      // Reset al cambiar de ruta antes de observar de nuevo el hero.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsPastHero(false)
 
       const navHeight = navBarRef.current?.offsetHeight ?? 80
@@ -60,6 +71,7 @@ function Navbar() {
     const menuFilters = document.getElementById('menu-filters')
 
     if (isMenuPage && menuFilters) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsPastMenuFilters(false)
 
       const navHeight = navBarRef.current?.offsetHeight ?? 80
@@ -85,7 +97,7 @@ function Navbar() {
     }
 
     setIsPastMenuFilters(true)
-  }, [location.pathname])
+  }, [location.pathname, isMenuPage])
 
   const useDarkOnMenu = isMenuPage && !isPastMenuFilters
   const isLight = useDarkOnMenu ? false : isPastHero
@@ -106,6 +118,7 @@ function Navbar() {
   return (
     <nav
       ref={navBarRef}
+      aria-label="Navegación principal"
       className={`inset-x-0 top-0 z-40 border-b transition-colors duration-300 ${
         isFixed ? 'fixed' : 'absolute'
       } ${
@@ -117,20 +130,17 @@ function Navbar() {
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          ref={navBarRef}
-          className="flex h-[var(--navbar-height)] items-center justify-between gap-4"
-        >
+        <div className="flex h-[var(--navbar-height)] items-center justify-between gap-4">
           <div className="flex shrink-0 items-center gap-3">
             <button
               type="button"
-              className={`md:hidden p-2 -ml-2 transition-colors ${
+              className={`-ml-2 cursor-pointer rounded-lg p-2 transition-all duration-200 md:hidden ${
                 useDarkOnMenu || !isLight
-                  ? 'text-crema hover:text-dorado'
-                  : 'text-humo hover:text-fuego-oscuro'
+                  ? 'text-crema hover:bg-white/10 hover:text-dorado'
+                  : 'text-humo hover:bg-crema hover:text-fuego-oscuro'
               }`}
               onClick={toggleMenu}
-              aria-label="Abrir menú de navegación"
+              aria-label={isMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
               aria-expanded={isMenuOpen}
             >
               <svg
@@ -167,28 +177,26 @@ function Navbar() {
             </Link>
           </div>
 
-          <nav
-            className="hidden md:flex flex-1 items-center justify-evenly mx-4 lg:mx-10"
-            aria-label="Navegación principal"
-          >
+          <div className="mx-4 hidden flex-1 items-center justify-evenly md:flex lg:mx-10">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
+                onClick={(event) => handleSectionClick(event, link.section)}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition-colors ${getLinkColor(isActive)}`
+                  `relative py-1 text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100 ${getLinkColor(isActive)}`
                 }
               >
                 {link.label}
               </NavLink>
             ))}
-          </nav>
+          </div>
 
           <div className="flex shrink-0 items-center justify-end">
             <button
               type="button"
               onClick={openAuthModal}
-              className="inline-flex items-center rounded-lg bg-fuego-oscuro px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-fuego-profundo sm:px-5 sm:py-2.5 sm:text-sm"
+              className="inline-flex cursor-pointer items-center rounded-lg bg-fuego-oscuro px-4 py-2 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 sm:px-5 sm:py-2.5 sm:text-sm"
             >
               Ordena ahora
             </button>

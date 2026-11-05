@@ -1,49 +1,81 @@
 import { useMemo, useState } from 'react'
 import { CartContext } from './cart-context'
 
-export function CartProvider({ children }) {
-  const [items, setItems] = useState([]) // { id, name, price, quantity, image }
+const getLineId = (productId, note) => {
+  const cleanNote = note.trim()
+  return cleanNote ? `${productId}::${cleanNote.toLowerCase()}` : productId
+}
 
-  const addItem = (product) => {
+const getItemKey = (item) => item.lineId ?? item.id
+
+const findLine = (items, target) =>
+  items.find((item) => getItemKey(item) === target) ??
+  items.find((item) => item.id === target)
+
+export function CartProvider({ children }) {
+  const [items, setItems] = useState([]) // { lineId, id, name, price, quantity, image, note }
+
+  const addItem = (product, options = {}) => {
+    const quantity = Math.max(1, options.quantity ?? 1)
+    const note = (options.note ?? '').trim()
+    const lineId = getLineId(product.id, note)
+
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id)
+      const existing = prev.find((item) => getItemKey(item) === lineId)
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+          getItemKey(item) === lineId
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       }
-      return [...prev, { ...product, quantity: 1 }]
+      return [...prev, { ...product, lineId, note, quantity }]
     })
   }
 
-  const increment = (productId) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+  const increment = (target) => {
+    setItems((prev) => {
+      const line = findLine(prev, target)
+      if (!line) return prev
+      const key = getItemKey(line)
+      return prev.map((item) =>
+        getItemKey(item) === key
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       )
-    )
+    })
   }
 
-  const decrement = (productId) => {
-    setItems((prev) =>
-      prev
+  const decrement = (target) => {
+    setItems((prev) => {
+      const line = findLine(prev, target)
+      if (!line) return prev
+      const key = getItemKey(line)
+      return prev
         .map((item) =>
-          item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+          getItemKey(item) === key
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
         )
         .filter((item) => item.quantity > 0)
-    )
+    })
   }
 
-  const removeItem = (productId) => {
-    setItems((prev) => prev.filter((item) => item.id !== productId))
+  const removeItem = (target) => {
+    setItems((prev) => {
+      const line = findLine(prev, target)
+      if (!line) return prev
+      const key = getItemKey(line)
+      return prev.filter((item) => getItemKey(item) !== key)
+    })
   }
 
   const clearCart = () => setItems([])
 
   const getQuantity = (productId) =>
-    items.find((item) => item.id === productId)?.quantity ?? 0
+    items
+      .filter((item) => item.id === productId)
+      .reduce((sum, item) => sum + item.quantity, 0)
 
   const totalItems = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity, 0),

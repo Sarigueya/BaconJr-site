@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import logo from '../assets/logos/logoBaconjrv2.svg'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
 import SocialLinks from './SocialLinks'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 // Pasos del modal:
 // 'invoice'       -> factura con el detalle del pedido
@@ -18,6 +19,8 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   const { clearCart } = useCart()
   const panelRef = useRef(null)
 
+  useBodyScrollLock()
+
   const handleConfirm = () => {
     clearCart()
     setStep('success')
@@ -29,33 +32,21 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   }
 
   // Cierra / retrocede según el paso (Escape y clic en el fondo).
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     if (step === 'confirmCancel') {
       setStep('invoice')
     } else {
       onClose()
     }
-  }
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [])
+  }, [step, onClose])
 
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.key !== 'Escape') return
-      if (step === 'confirmCancel') {
-        setStep('invoice')
-      } else {
-        onClose()
-      }
+      if (event.key === 'Escape') dismiss()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [step, onClose])
+  }, [dismiss])
 
   // Al cambiar de paso, el foco pasa al panel para lectores de pantalla y teclado.
   useEffect(() => {
@@ -77,7 +68,7 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
         ref={panelRef}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-3xl bg-crema text-carbon shadow-[0_30px_80px_-20px_rgba(241,90,36,0.55)] ring-1 ring-fuego/30 outline-none animate-[offerPop_350ms_cubic-bezier(0.16,1,0.3,1)] data-[step=invoice]:max-w-lg data-[step=success]:max-w-md data-[step=cancelled]:max-w-md data-[step=confirmCancel]:max-w-sm"
+        className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-3xl bg-crema text-carbon shadow-[0_30px_80px_-20px_rgba(241,90,36,0.55)] ring-1 ring-fuego/30 outline-none animate-[offerPop_350ms_cubic-bezier(0.16,1,0.3,1)] data-[step=invoice]:sm:max-w-3xl data-[step=success]:sm:max-w-lg data-[step=cancelled]:sm:max-w-lg data-[step=confirmCancel]:sm:max-w-md"
         data-step={step}
       >
         {step === 'invoice' && (
@@ -163,74 +154,97 @@ function InvoiceStep({ titleId, order, onClose, onAskCancel, onConfirm }) {
         </div>
       </div>
 
-      {/* Datos del pedido */}
-      <div className="flex items-center justify-between gap-4 border-b border-dashed border-arena px-6 py-3 text-xs text-humo">
-        <span>
-          <span className="font-semibold text-carbon">Fecha: </span>
-          {order.date}
-        </span>
-        <span>
-          <span className="font-semibold text-carbon">Productos: </span>
-          {order.totalItems}
-        </span>
-      </div>
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <div className="flex min-h-0 flex-1 flex-col">
+          {/* Datos del pedido */}
+          <div className="flex items-center justify-between gap-4 border-b border-dashed border-arena px-6 py-3 text-xs text-humo">
+            <span>
+              <span className="font-semibold text-carbon">Fecha: </span>
+              {order.date}
+            </span>
+            <span>
+              <span className="font-semibold text-carbon">Productos: </span>
+              {order.totalItems}
+            </span>
+          </div>
 
-      {/* Detalle */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
-        <div className="mb-2 grid grid-cols-[1fr_auto] gap-4 text-[11px] font-bold tracking-wider text-humo uppercase">
-          <span>Detalle</span>
-          <span>Subtotal</span>
+          {/* Detalle */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+            <div className="mb-2 grid grid-cols-[1fr_auto] gap-4 text-[11px] font-bold tracking-wider text-humo uppercase">
+              <span>Detalle</span>
+              <span>Subtotal</span>
+            </div>
+
+            <ul className="divide-y divide-arena/80">
+              {order.items.map((item) => (
+                <li
+                  key={item.lineId ?? item.id}
+                  className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3"
+                >
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt=""
+                      className="h-14 w-14 rounded-lg border border-arena bg-white object-cover"
+                    />
+                  ) : (
+                    <span
+                      className="h-14 w-14 rounded-lg border border-arena bg-white"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{item.name}</p>
+                    <p className="text-xs text-humo">
+                      {item.quantity} × {formatPrice(item.price)}
+                    </p>
+                    {item.note && (
+                      <p className="mt-1 text-xs italic break-words text-fuego-oscuro">
+                        Nota: {item.note}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-sm font-bold text-roble">
+                    {formatPrice(item.price * item.quantity)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <ul className="divide-y divide-arena/80">
-          {order.items.map((item) => (
-            <li key={item.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt=""
-                  className="h-12 w-12 rounded-lg border border-arena bg-white object-cover"
-                />
-              ) : (
-                <span className="h-12 w-12 rounded-lg border border-arena bg-white" aria-hidden="true" />
-              )}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{item.name}</p>
-                <p className="text-xs text-humo">
-                  {item.quantity} × {formatPrice(item.price)}
-                </p>
-              </div>
-              <span className="text-sm font-bold text-roble">
-                {formatPrice(item.price * item.quantity)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+        {/* Resumen y acciones */}
+        <aside className="flex shrink-0 flex-col justify-between border-t border-dashed border-arena bg-white md:w-72 md:border-t-0 md:border-l lg:w-80">
+          <div className="px-6 py-5">
+            <span className="text-xs font-semibold tracking-wider text-humo uppercase">
+              Total a pagar
+            </span>
+            <span className="mt-1 block text-4xl font-black text-carbon">
+              {formatPrice(order.total)}
+            </span>
+            <p className="mt-2 text-xs text-humo">
+              {order.totalItems}{' '}
+              {order.totalItems === 1 ? 'producto' : 'productos'} en tu pedido
+            </p>
+          </div>
 
-      {/* Total */}
-      <div className="border-t border-dashed border-arena bg-white px-6 py-4">
-        <div className="flex items-end justify-between">
-          <span className="text-sm font-semibold tracking-wider text-humo uppercase">Total a pagar</span>
-          <span className="text-3xl font-black text-carbon">{formatPrice(order.total)}</span>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onAskCancel}
-            className="cursor-pointer rounded-xl border border-arena px-4 py-3 text-sm font-semibold text-carbon transition-colors hover:border-brasa hover:text-brasa focus-visible:ring-2 focus-visible:ring-fuego focus-visible:outline-none"
-          >
-            Cancelar pedido
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
-          >
-            Confirmar pedido
-          </button>
-        </div>
+          <div className="space-y-3 px-6 pb-5">
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
+            >
+              Confirmar pedido
+            </button>
+            <button
+              type="button"
+              onClick={onAskCancel}
+              className="w-full cursor-pointer rounded-xl border border-arena px-4 py-3 text-sm font-semibold text-carbon transition-colors hover:border-brasa hover:text-brasa focus-visible:ring-2 focus-visible:ring-fuego focus-visible:outline-none"
+            >
+              Cancelar pedido
+            </button>
+          </div>
+        </aside>
       </div>
 
       {/* Redes */}

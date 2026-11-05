@@ -2,18 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
-import ofertaCostillas from '../assets/img/Oferta de costillas BBQ.png'
-
-// Oferta de ejemplo. Cambia estos datos para mostrar otra promoción.
-const DAILY_OFFER = {
-  id: 'offer-daily',
-  name: 'Costillas BBQ para dos',
-  description:
-    'Dos porciones de costillas de cerdo ahumadas al barril, bañadas en nuestra salsa BBQ de la casa, con papas a la francesa.',
-  originalPrice: 490,
-  price: 245,
-  image: ofertaCostillas,
-}
+import { DAILY_OFFER } from '../data/offers'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 const STORAGE_KEY = 'baconjr-daily-offer-seen'
 const OPEN_DELAY_MS = 900
@@ -54,6 +44,8 @@ function DailyOfferModal() {
   const { addItem } = useCart()
   const navigate = useNavigate()
 
+  useBodyScrollLock(isOpen)
+
   const discount = Math.round(
     (1 - DAILY_OFFER.price / DAILY_OFFER.originalPrice) * 100
   )
@@ -79,13 +71,11 @@ function DailyOfferModal() {
     const interval = setInterval(() => setTimeLeft(getTimeUntilMidnight()), 1000)
 
     document.addEventListener('keydown', onKeyDown)
-    document.body.style.overflow = 'hidden'
     closeButtonRef.current?.focus()
 
     return () => {
       clearInterval(interval)
       document.removeEventListener('keydown', onKeyDown)
-      document.body.style.overflow = ''
     }
   }, [isOpen, close])
 
@@ -160,7 +150,7 @@ function DailyOfferModal() {
               {DAILY_OFFER.name}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-crema/75">
-              {DAILY_OFFER.description}
+              {DAILY_OFFER.longDescription ?? DAILY_OFFER.description}
             </p>
           </div>
 
