@@ -1,5 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BannerCard from './BannerCard'
+import OfferModal from './OfferModal'
+import { OFFERS } from '../data/offers'
 import carouselCostillas from '../assets/offers/carousel-costillas-bbq.svg'
 import carouselComboFamiliar from '../assets/offers/carousel-combo-familiar.svg'
 import carouselHappyHour from '../assets/offers/carousel-happy-hour.svg'
@@ -10,7 +13,8 @@ const BANNERS = [
     title: 'Especiales de Temporada',
     subtitle: 'Costillas BBQ con precio especial.',
     cta: 'Ver oferta',
-    ctaTo: '/#offers',
+    action: 'detail',
+    offerId: 'offer-costillas',
     image: carouselCostillas,
     imageMode: 'cutout',
   },
@@ -19,7 +23,8 @@ const BANNERS = [
     title: 'Combo Familiar',
     subtitle: 'Para 6 personas, solo $690.',
     cta: 'Ordenar',
-    ctaTo: '/menu?category=all',
+    action: 'order',
+    offerId: 'offer-combo-familiar',
     image: carouselComboFamiliar,
     imageMode: 'cover',
   },
@@ -28,7 +33,8 @@ const BANNERS = [
     title: 'Happy Hour',
     subtitle: '2x1 en bebidas de lunes a viernes.',
     cta: 'Más info',
-    ctaTo: '/#offers',
+    action: 'detail',
+    offerId: 'offer-happy-hour',
     image: carouselHappyHour,
     imageMode: 'cover',
   },
@@ -39,7 +45,9 @@ const SLIDE_INTERVAL = 4000
 function HeroSlider() {
   const [current, setCurrent] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [selectedOffer, setSelectedOffer] = useState(null)
   const timerRef = useRef(null)
+  const navigate = useNavigate()
 
   const goToNext = useCallback(() => {
     setCurrent((prev) => (prev + 1) % BANNERS.length)
@@ -63,6 +71,18 @@ function HeroSlider() {
 
     return () => clearInterval(timerRef.current)
   }, [isPaused, goToNext])
+
+  const closeOfferModal = useCallback(() => setSelectedOffer(null), [])
+
+  const handleCta = (banner) => {
+    if (banner.action === 'order') {
+      const offer = OFFERS.find((item) => item.id === banner.offerId)
+      if (offer) setSelectedOffer(offer)
+      return
+    }
+
+    navigate({ pathname: '/', hash: banner.offerId })
+  }
 
   const handleKeyDown = (event) => {
     if (event.key === 'ArrowLeft') {
@@ -103,6 +123,7 @@ function HeroSlider() {
             key={banner.id}
             {...banner}
             isActive={index === current}
+            onCta={() => handleCta(banner)}
           />
         ))}
       </div>
@@ -157,6 +178,8 @@ function HeroSlider() {
           }}
         />
       </div>
+
+      <OfferModal offer={selectedOffer} onClose={closeOfferModal} />
     </section>
   )
 }

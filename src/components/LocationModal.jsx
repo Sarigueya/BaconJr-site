@@ -4,30 +4,12 @@ import L from 'leaflet'
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
-
-const NEARBY_STORES = [
-  {
-    id: 1,
-    name: 'BACON JR. Centro',
-    address: 'Av. Principal #123, Ciudad de México',
-    lat: 19.4326,
-    lng: -99.1332,
-  },
-  {
-    id: 2,
-    name: 'BACON JR. Roma',
-    address: 'Av. Álvaro Obregón #45, Ciudad de México',
-    lat: 19.4147,
-    lng: -99.165,
-  },
-]
+import { LOCATION_STORAGE_KEY, NEARBY_STORES } from '../data/stores'
 
 const DEFAULT_CENTER = {
   lat: NEARBY_STORES[0].lat,
   lng: NEARBY_STORES[0].lng,
 }
-
-export const LOCATION_STORAGE_KEY = 'baconjr-location'
 
 const markerIcon = L.divIcon({
   className: 'baconjr-map-marker',

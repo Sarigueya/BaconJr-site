@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
@@ -7,10 +7,23 @@ import InvoiceModal from './InvoiceModal'
 function CartButton() {
   const [isOpen, setIsOpen] = useState(false)
   const [order, setOrder] = useState(null) // foto del pedido mostrada en la factura
-  const { items, increment, decrement, removeItem, totalItems, totalPrice } = useCart()
+  const [confirmClear, setConfirmClear] = useState(false)
+  const { items, removeItem, clearCart, totalItems, totalPrice, setItemQuantity } =
+    useCart()
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isOpen])
   const navigate = useNavigate()
 
-  const openInvoice = () => {
+  const openCheckout = () => {
     setOrder({
       number: `BJ-${String(Date.now()).slice(-5)}`,
       date: new Date().toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }),
@@ -21,7 +34,7 @@ function CartButton() {
     setIsOpen(false)
   }
 
-  const closeInvoice = () => setOrder(null)
+  const closeCheckout = () => setOrder(null)
 
   const goToMenu = () => {
     setOrder(null)
@@ -83,7 +96,9 @@ function CartButton() {
                       <div className="flex items-center gap-1.5 bg-crema rounded-lg px-1.5 py-1">
                         <button
                           type="button"
-                          onClick={() => decrement(lineId)}
+                          onClick={() =>
+                            setItemQuantity(item, item.quantity - 1, { note: item.note })
+                          }
                           className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
                           aria-label={`Quitar uno de ${item.name}`}
                         >
@@ -94,7 +109,9 @@ function CartButton() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => increment(lineId)}
+                          onClick={() =>
+                            setItemQuantity(item, item.quantity + 1, { note: item.note })
+                          }
                           className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-carbon font-bold hover:bg-arena transition-colors"
                           aria-label={`Agregar uno más de ${item.name}`}
                         >
@@ -118,19 +135,55 @@ function CartButton() {
             </div>
           )}
 
-          {items.length > 0 && (
+          {items.length > 0 && !confirmClear && (
             <div className="px-4 py-4 border-t border-arena bg-white space-y-3">
+              <button
+                type="button"
+                onClick={() => setConfirmClear(true)}
+                className="w-full cursor-pointer rounded-lg border border-arena px-4 py-2 text-xs font-semibold text-humo transition-colors hover:border-brasa hover:text-brasa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+              >
+                Vaciar carrito
+              </button>
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-humo">Total</span>
                 <span className="text-lg font-bold text-carbon">{formatPrice(totalPrice)}</span>
               </div>
               <button
                 type="button"
-                onClick={openInvoice}
+                onClick={openCheckout}
                 className="w-full py-3 bg-fuego-oscuro text-white text-sm font-semibold rounded-lg hover:bg-fuego-profundo transition-colors"
               >
-                Ver factura y confirmar
+                Hacer pedido
               </button>
+            </div>
+          )}
+
+          {items.length > 0 && confirmClear && (
+            <div className="px-4 py-4 border-t border-arena bg-white space-y-3">
+              <p className="text-sm font-bold text-carbon">¿Vaciar tu carrito?</p>
+              <p className="text-xs leading-relaxed text-humo">
+                Se eliminarán todos los productos que agregaste. Esta acción no se puede deshacer.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmClear(false)}
+                  className="flex-1 cursor-pointer rounded-lg border border-arena px-4 py-2.5 text-sm font-semibold text-carbon transition-colors hover:border-fuego focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearCart()
+                    setConfirmClear(false)
+                  }}
+                  className="flex-1 cursor-pointer rounded-lg bg-brasa px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brasa/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+                >
+                  Sí, vaciar
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -139,7 +192,10 @@ function CartButton() {
       {/* Botón flotante del carrito */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          setConfirmClear(false)
+          setIsOpen((prev) => !prev)
+        }}
         className="fixed bottom-24 right-6 z-50 w-14 h-14 bg-fuego text-white rounded-full shadow-lg flex items-center justify-center hover:bg-fuego-oscuro transition-colors"
         aria-label="Carrito de compras"
       >
@@ -159,7 +215,7 @@ function CartButton() {
       </button>
 
       {order && (
-        <InvoiceModal order={order} onClose={closeInvoice} onGoToMenu={goToMenu} />
+        <InvoiceModal order={order} onClose={closeCheckout} onGoToMenu={goToMenu} />
       )}
     </>
   )

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import LocationModal, { LOCATION_STORAGE_KEY } from './LocationModal'
+import LocationModal from './LocationModal'
+import { LOCATION_STORAGE_KEY } from '../data/stores'
 import heroBackground from '../assets/hero/hero-background.png'
 
 const readStoredLocation = () => {

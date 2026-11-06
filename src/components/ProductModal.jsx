@@ -12,10 +12,10 @@ function ProductModal({ product, onClose }) {
 }
 
 function ProductModalContent({ product, onClose }) {
-  const [quantity, setQuantity] = useState(1)
+  const { setItemQuantity, getLineQuantity } = useCart()
   const [note, setNote] = useState('')
+  const [quantity, setQuantity] = useState(() => Math.max(1, getLineQuantity(product.id, note)))
   const closeButtonRef = useRef(null)
-  const { addItem } = useCart()
 
   useBodyScrollLock()
 
@@ -36,12 +36,15 @@ function ProductModalContent({ product, onClose }) {
     CATEGORIES.find((category) => category.id === product.category)?.label ??
     'Menú'
 
+  const lineQuantity = getLineQuantity(product.id, note)
+  const isInCart = lineQuantity > 0
+
   const handleAdd = () => {
-    addItem(product, { quantity, note })
+    setItemQuantity(product, quantity, { note })
     onClose()
   }
 
-  const decreaseQuantity = () => setQuantity((prev) => Math.max(1, prev - 1))
+  const decreaseQuantity = () => setQuantity((prev) => Math.max(0, prev - 1))
   const increaseQuantity = () => setQuantity((prev) => Math.min(20, prev + 1))
 
   return createPortal(
@@ -152,9 +155,11 @@ function ProductModalContent({ product, onClose }) {
             <button
               type="button"
               onClick={handleAdd}
-              className="flex-1 cursor-pointer rounded-xl bg-fuego-oscuro px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+              disabled={quantity <= 0 && lineQuantity <= 0}
+              className="flex-1 cursor-pointer rounded-xl bg-fuego-oscuro px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Agregar al carrito · {formatPrice(product.price * quantity)}
+              {isInCart ? 'Actualizar carrito' : 'Agregar al carrito'} ·{' '}
+              {formatPrice(product.price * quantity)}
             </button>
           </div>
         </div>

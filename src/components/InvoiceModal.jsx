@@ -2,42 +2,94 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
+import { LOCATION_STORAGE_KEY, NEARBY_STORES } from '../data/stores'
+import { FULFILLMENT_OPTIONS, PAYMENT_METHODS } from '../data/checkout'
 import SocialLinks from './SocialLinks'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
-// Pasos del modal:
-// 'invoice'       -> factura con el detalle del pedido
-// 'confirmCancel' -> "¿Seguro que quieres cancelar?"
+// Pasos del checkout:
+// 'invoice'       -> resumen/factura del pedido
+// 'fulfillment'   -> para llevar (domicilio) o recoger en sucursal
+// 'payment'       -> método de pago y total
+// 'processing'    -> pago simulado en curso
 // 'success'       -> pedido exitoso
+// 'confirmCancel' -> "¿Seguro que quieres cancelar?"
 // 'cancelled'     -> pedido cancelado
 //
-// `order` es una "foto" del carrito tomada al abrir la factura:
+// `order` es una "foto" del carrito tomada al abrir el checkout:
 // { number, date, items, totalItems, total }. Así el resumen se sigue
 // viendo aunque el carrito ya se haya limpiado.
+
+const PANEL_WIDTH = {
+  invoice: 'sm:max-w-3xl',
+  fulfillment: 'sm:max-w-xl',
+  payment: 'sm:max-w-xl',
+  processing: 'sm:max-w-md',
+  confirmCancel: 'sm:max-w-md',
+  success: 'sm:max-w-lg',
+  cancelled: 'sm:max-w-lg',
+}
+
+function readStoredLocation() {
+  try {
+    const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (typeof parsed?.lat === 'number') return parsed
+  } catch {
+    // Si el navegador bloquea localStorage, el checkout funciona igual.
+  }
+  return null
+}
+
 function InvoiceModal({ order, onClose, onGoToMenu }) {
+  const [storedLocation] = useState(readStoredLocation)
   const [step, setStep] = useState('invoice')
+  const [fulfillment, setFulfillment] = useState(null)
+  const [deliveryName, setDeliveryName] = useState(storedLocation?.name ?? '')
+  const [deliveryAddress, setDeliveryAddress] = useState(
+    storedLocation?.address?.slice(0, 140) ?? ''
+  )
+  const [pickupStoreId, setPickupStoreId] = useState(
+    storedLocation?.storeId ?? NEARBY_STORES[0].id
+  )
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id)
   const { clearCart } = useCart()
   const panelRef = useRef(null)
+  const paymentTimerRef = useRef(null)
 
   useBodyScrollLock()
 
-  const handleConfirm = () => {
-    clearCart()
-    setStep('success')
-  }
+  const pickupStore =
+    NEARBY_STORES.find((store) => store.id === pickupStoreId) ?? NEARBY_STORES[0]
+
+  const isFulfillmentValid =
+    fulfillment === 'delivery'
+      ? deliveryName.trim().length >= 2 && deliveryAddress.trim().length >= 5
+      : fulfillment === 'pickup' && Boolean(pickupStoreId)
 
   const handleCancel = () => {
     clearCart()
     setStep('cancelled')
   }
 
-  // Cierra / retrocede según el paso (Escape y clic en el fondo).
+  const handlePayment = () => {
+    if (step !== 'payment') return
+    setStep('processing')
+    window.clearTimeout(paymentTimerRef.current)
+    paymentTimerRef.current = window.setTimeout(() => {
+      clearCart()
+      setStep('success')
+    }, 1400)
+  }
+
   const dismiss = useCallback(() => {
+    if (step === 'processing') return
     if (step === 'confirmCancel') {
       setStep('invoice')
-    } else {
-      onClose()
+      return
     }
+    onClose()
   }, [step, onClose])
 
   useEffect(() => {
@@ -48,12 +100,27 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [dismiss])
 
+  useEffect(() => () => window.clearTimeout(paymentTimerRef.current), [])
+
   // Al cambiar de paso, el foco pasa al panel para lectores de pantalla y teclado.
   useEffect(() => {
     panelRef.current?.focus()
   }, [step])
 
   const titleId = 'invoice-modal-title'
+  const paymentLabel =
+    PAYMENT_METHODS.find((method) => method.id === paymentMethod)?.label ?? 'Pago'
+
+  const fulfillmentSummary =
+    fulfillment === 'delivery'
+      ? {
+          label: 'Entrega a domicilio',
+          detail: `${deliveryName} · ${deliveryAddress}`,
+        }
+      : {
+          label: 'Recoger en sucursal',
+          detail: `${pickupStore.name} · ${pickupStore.address}`,
+        }
 
   return (
     <div
@@ -64,22 +131,64 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
       aria-labelledby={titleId}
     >
       <div
-        key={step}
         ref={panelRef}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-3xl bg-crema text-carbon shadow-[0_30px_80px_-20px_rgba(241,90,36,0.55)] ring-1 ring-fuego/30 outline-none animate-[offerPop_350ms_cubic-bezier(0.16,1,0.3,1)] data-[step=invoice]:sm:max-w-3xl data-[step=success]:sm:max-w-lg data-[step=cancelled]:sm:max-w-lg data-[step=confirmCancel]:sm:max-w-md"
-        data-step={step}
+        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-3xl bg-crema text-carbon shadow-[0_30px_80px_-20px_rgba(241,90,36,0.55)] ring-1 ring-fuego/30 outline-none animate-[offerPop_350ms_cubic-bezier(0.16,1,0.3,1)] ${PANEL_WIDTH[step]}`}
       >
+        {step !== 'processing' && (
+          <button
+            type="button"
+            onClick={dismiss}
+            className="absolute top-3 right-3 z-30 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-carbon text-crema shadow-md transition-colors hover:bg-fuego focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+            aria-label="Cerrar"
+          >
+            <CloseIcon />
+          </button>
+        )}
+
         {step === 'invoice' && (
           <InvoiceStep
             titleId={titleId}
             order={order}
-            onClose={onClose}
             onAskCancel={() => setStep('confirmCancel')}
-            onConfirm={handleConfirm}
+            onContinue={() => setStep('fulfillment')}
           />
         )}
+
+        {step === 'fulfillment' && (
+          <FulfillmentStep
+            titleId={titleId}
+            fulfillment={fulfillment}
+            onSelect={setFulfillment}
+            deliveryName={deliveryName}
+            deliveryAddress={deliveryAddress}
+            onDeliveryNameChange={setDeliveryName}
+            onDeliveryAddressChange={setDeliveryAddress}
+            pickupStoreId={pickupStoreId}
+            onPickupStoreChange={setPickupStoreId}
+            onBack={() => setStep('invoice')}
+            onContinue={() => setStep('payment')}
+            isValid={isFulfillmentValid}
+          />
+        )}
+
+        {step === 'payment' && (
+          <PaymentStep
+            titleId={titleId}
+            order={order}
+            fulfillment={fulfillment}
+            deliveryName={deliveryName}
+            deliveryAddress={deliveryAddress}
+            pickupStore={pickupStore}
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={setPaymentMethod}
+            onBack={() => setStep('fulfillment')}
+            onPay={handlePayment}
+          />
+        )}
+
+        {step === 'processing' && <ProcessingStep titleId={titleId} order={order} />}
 
         {step === 'confirmCancel' && (
           <ConfirmCancelStep
@@ -95,8 +204,9 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
             tone="success"
             title="¡Pedido exitoso!"
             order={order}
-            message="Recibimos tu pedido y ya lo estamos preparando. ¡Gracias por elegir Bacon Jr.!"
-            onClose={onClose}
+            message="Pago confirmado. Ya estamos preparando tu pedido. ¡Gracias por elegir Bacon Jr.!"
+            fulfillment={fulfillmentSummary}
+            paymentLabel={paymentLabel}
             onGoToMenu={onGoToMenu}
           />
         )}
@@ -108,7 +218,6 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
             title="Pedido cancelado"
             order={order}
             message="Tu carrito quedó vacío. Cuando quieras, puedes armar un nuevo pedido desde el menú."
-            onClose={onClose}
             onGoToMenu={onGoToMenu}
           />
         )}
@@ -125,7 +234,61 @@ function CloseIcon() {
   )
 }
 
-function InvoiceStep({ titleId, order, onClose, onAskCancel, onConfirm }) {
+function DeliveryIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h11v8H3zM14 10h4l3 3v2h-7z" />
+      <circle cx="7" cy="18" r="1.5" />
+      <circle cx="17.5" cy="18" r="1.5" />
+    </svg>
+  )
+}
+
+function StoreIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10 5 4h14l2 6M4 10v9h16v-9M4 10h16M9 19v-5h6v5" />
+    </svg>
+  )
+}
+
+function CheckoutProgress({ current }) {
+  const steps = ['Entrega', 'Pago', 'Confirmación']
+
+  return (
+    <ol className="flex items-center gap-2" aria-label="Progreso del pedido">
+      {steps.map((label, index) => {
+        const isDone = index < current
+        const isCurrent = index === current
+
+        return (
+          <li key={label} className="flex min-w-0 flex-1 items-center gap-2">
+            <span
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                isDone || isCurrent ? 'bg-fuego-oscuro text-white' : 'bg-arena text-humo'
+              }`}
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              {isDone ? '✓' : index + 1}
+            </span>
+            <span
+              className={`truncate text-[10px] font-bold tracking-wider uppercase ${
+                isCurrent ? 'text-carbon' : 'text-humo'
+              }`}
+            >
+              {label}
+            </span>
+            {index < steps.length - 1 && (
+              <span className="h-px flex-1 bg-arena" aria-hidden="true" />
+            )}
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+function InvoiceStep({ titleId, order, onAskCancel, onContinue }) {
   return (
     <>
       {/* Encabezado */}
@@ -134,20 +297,11 @@ function InvoiceStep({ titleId, order, onClose, onAskCancel, onConfirm }) {
           aria-hidden="true"
           className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-fuego/25 blur-3xl"
         />
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-carbon-suave text-crema transition-colors hover:bg-fuego focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
-          aria-label="Cerrar factura"
-        >
-          <CloseIcon />
-        </button>
-
         <div className="relative flex items-center gap-4">
           <img src={logo} alt="Bacon Jr." className="h-12 w-auto" />
           <div className="border-l border-crema/20 pl-4">
             <h2 id={titleId} className="text-xs font-bold tracking-[0.2em] text-dorado uppercase">
-              Factura de pedido
+              Resumen del pedido
             </h2>
             <p className="mt-1 text-lg font-black">{order.number}</p>
           </div>
@@ -231,10 +385,10 @@ function InvoiceStep({ titleId, order, onClose, onAskCancel, onConfirm }) {
           <div className="space-y-3 px-6 pb-5">
             <button
               type="button"
-              onClick={onConfirm}
+              onClick={onContinue}
               className="w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
             >
-              Confirmar pedido
+              Continuar con el pedido
             </button>
             <button
               type="button"
@@ -253,6 +407,311 @@ function InvoiceStep({ titleId, order, onClose, onAskCancel, onConfirm }) {
         <SocialLinks variant="light" />
       </div>
     </>
+  )
+}
+
+function FulfillmentStep({
+  titleId,
+  fulfillment,
+  onSelect,
+  deliveryName,
+  deliveryAddress,
+  onDeliveryNameChange,
+  onDeliveryAddressChange,
+  pickupStoreId,
+  onPickupStoreChange,
+  onBack,
+  onContinue,
+  isValid,
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b border-arena bg-white px-6 py-4">
+        <h2 id={titleId} className="text-lg font-black text-carbon sm:text-xl">
+          ¿Cómo quieres recibir tu pedido?
+        </h2>
+        <p className="mt-1 text-xs text-humo">
+          Elige entrega a domicilio o recoger en sucursal.
+        </p>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        <CheckoutProgress current={0} />
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {FULFILLMENT_OPTIONS.map((option) => {
+            const isSelected = fulfillment === option.id
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onSelect(option.id)}
+                aria-pressed={isSelected}
+                className={`rounded-2xl border p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego ${
+                  isSelected
+                    ? 'border-fuego bg-fuego/10 shadow-sm'
+                    : 'border-arena bg-white hover:border-fuego/60 hover:bg-crema'
+                }`}
+              >
+                <span
+                  className={`mb-2 flex h-9 w-9 items-center justify-center rounded-xl ${
+                    isSelected ? 'bg-fuego-oscuro text-white' : 'bg-crema text-fuego-oscuro'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {option.id === 'delivery' ? <DeliveryIcon /> : <StoreIcon />}
+                </span>
+                <span className="block text-sm font-bold text-carbon">{option.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-humo">
+                  {option.description}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        {fulfillment === 'delivery' && (
+          <div className="mt-4 space-y-3 rounded-2xl border border-arena bg-white p-4">
+            <div>
+              <label
+                htmlFor="checkout-address"
+                className="mb-1 block text-xs font-semibold text-humo"
+              >
+                Dirección de entrega
+              </label>
+              <textarea
+                id="checkout-address"
+                value={deliveryAddress}
+                onChange={(event) => onDeliveryAddressChange(event.target.value)}
+                rows={2}
+                maxLength={140}
+                placeholder="Calle, número, barrio y referencias…"
+                className="w-full resize-none rounded-xl border border-arena bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
+              />
+              <p className="mt-1 text-right text-[11px] text-humo">
+                {deliveryAddress.length}/140
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="checkout-name"
+                className="mb-1 block text-xs font-semibold text-humo"
+              >
+                ¿A nombre de quién?
+              </label>
+              <input
+                id="checkout-name"
+                type="text"
+                value={deliveryName}
+                onChange={(event) => onDeliveryNameChange(event.target.value)}
+                maxLength={60}
+                placeholder="Nombre de quien recibe"
+                className="w-full rounded-xl border border-arena bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
+              />
+            </div>
+
+            <p className="text-[11px] text-humo">
+              Completa la dirección y el nombre para continuar al pago.
+            </p>
+          </div>
+        )}
+
+        {fulfillment === 'pickup' && (
+          <div className="mt-4 rounded-2xl border border-arena bg-white p-4">
+            <p className="mb-2 text-xs font-semibold tracking-wider text-humo uppercase">
+              Sucursal para recoger
+            </p>
+            <div className="space-y-2">
+              {NEARBY_STORES.map((store) => {
+                const isSelected = store.id === pickupStoreId
+
+                return (
+                  <button
+                    key={store.id}
+                    type="button"
+                    onClick={() => onPickupStoreChange(store.id)}
+                    aria-pressed={isSelected}
+                    className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego ${
+                      isSelected
+                        ? 'border-fuego bg-fuego/10'
+                        : 'border-arena bg-crema hover:border-fuego/60'
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-carbon">
+                        {store.name}
+                      </span>
+                      <span className="block truncate text-xs text-humo">{store.address}</span>
+                    </span>
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+                        isSelected
+                          ? 'border-fuego-oscuro bg-fuego-oscuro text-white'
+                          : 'border-arena bg-white'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {isSelected ? '✓' : ''}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-arena bg-white px-6 py-4">
+        <button
+          type="button"
+          onClick={onBack}
+          className="cursor-pointer rounded-xl border border-arena px-5 py-2.5 text-sm font-semibold text-carbon transition-colors hover:border-fuego focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+        >
+          Volver
+        </button>
+        <button
+          type="button"
+          onClick={onContinue}
+          disabled={!isValid}
+          className="cursor-pointer rounded-xl bg-fuego-oscuro px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+        >
+          Ir a pagar
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PaymentStep({
+  titleId,
+  order,
+  fulfillment,
+  deliveryName,
+  deliveryAddress,
+  pickupStore,
+  paymentMethod,
+  onPaymentMethodChange,
+  onBack,
+  onPay,
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b border-arena bg-white px-6 py-4">
+        <h2 id={titleId} className="text-lg font-black text-carbon sm:text-xl">
+          Pago del pedido
+        </h2>
+        <p className="mt-1 text-xs text-humo">
+          Este es un pago de demostración: no se realizará ningún cobro real.
+        </p>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        <CheckoutProgress current={1} />
+
+        <div className="mt-4 rounded-2xl border border-arena bg-white p-4">
+          <p className="text-[11px] font-bold tracking-wider text-humo uppercase">Entrega</p>
+          <p className="mt-1 text-sm font-semibold text-carbon">
+            {fulfillment === 'delivery'
+              ? `Para llevar a ${deliveryName}`
+              : `Recoger en ${pickupStore.name}`}
+          </p>
+          <p className="mt-1 text-xs text-humo">
+            {fulfillment === 'delivery' ? deliveryAddress : pickupStore.address}
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-[11px] font-bold tracking-wider text-humo uppercase">
+            Método de pago
+          </p>
+          <div className="mt-2 space-y-2">
+            {PAYMENT_METHODS.map((method) => {
+              const isSelected = method.id === paymentMethod
+
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => onPaymentMethodChange(method.id)}
+                  aria-pressed={isSelected}
+                  className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego ${
+                    isSelected
+                      ? 'border-fuego bg-fuego/10'
+                      : 'border-arena bg-white hover:border-fuego/60'
+                  }`}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-carbon">
+                      {method.label}
+                    </span>
+                    <span className="block text-xs leading-relaxed text-humo">
+                      {method.description}
+                    </span>
+                  </span>
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+                      isSelected
+                        ? 'border-fuego-oscuro bg-fuego-oscuro text-white'
+                        : 'border-arena bg-white'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {isSelected ? '✓' : ''}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-dashed border-arena bg-crema px-4 py-3">
+          <span className="text-sm text-humo">Total a pagar</span>
+          <span className="text-2xl font-black text-carbon">{formatPrice(order.total)}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-arena bg-white px-6 py-4">
+        <button
+          type="button"
+          onClick={onBack}
+          className="cursor-pointer rounded-xl border border-arena px-5 py-2.5 text-sm font-semibold text-carbon transition-colors hover:border-fuego focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+        >
+          Volver
+        </button>
+        <button
+          type="button"
+          onClick={onPay}
+          className="cursor-pointer rounded-xl bg-fuego-oscuro px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+        >
+          Pagar {formatPrice(order.total)}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ProcessingStep({ titleId, order }) {
+  return (
+    <div
+      className="flex flex-col items-center gap-4 px-6 py-10 text-center"
+      role="status"
+      aria-live="polite"
+    >
+      <span
+        className="h-12 w-12 animate-spin rounded-full border-4 border-arena border-t-fuego-oscuro motion-reduce:animate-none"
+        aria-hidden="true"
+      />
+      <div>
+        <h2 id={titleId} className="text-lg font-black text-carbon">
+          Procesando tu pago…
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-humo">
+          Estamos confirmando tu pedido {order.number}. No cierres esta ventana.
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -299,7 +758,16 @@ function ConfirmCancelStep({ titleId, onBack, onCancel }) {
   )
 }
 
-function ResultStep({ titleId, tone, title, order, message, onClose, onGoToMenu }) {
+function ResultStep({
+  titleId,
+  tone,
+  title,
+  order,
+  message,
+  fulfillment,
+  paymentLabel,
+  onGoToMenu,
+}) {
   const isSuccess = tone === 'success'
 
   return (
@@ -329,30 +797,39 @@ function ResultStep({ titleId, tone, title, order, message, onClose, onGoToMenu 
       </div>
 
       {isSuccess && (
-        <div className="flex w-full items-center justify-between rounded-xl border border-arena bg-white px-4 py-3 text-sm">
-          <span className="text-humo">
-            {order.totalItems} {order.totalItems === 1 ? 'producto' : 'productos'}
-          </span>
-          <span className="font-black">{formatPrice(order.total)}</span>
+        <div className="w-full space-y-2 rounded-xl border border-arena bg-white px-4 py-3 text-left text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-humo">
+              {order.totalItems} {order.totalItems === 1 ? 'producto' : 'productos'}
+            </span>
+            <span className="font-black">{formatPrice(order.total)}</span>
+          </div>
+
+          {fulfillment && (
+            <div className="border-t border-dashed border-arena pt-2">
+              <p className="text-[11px] font-bold tracking-wider text-humo uppercase">
+                {fulfillment.label}
+              </p>
+              <p className="mt-0.5 text-xs break-words text-carbon">{fulfillment.detail}</p>
+            </div>
+          )}
+
+          {paymentLabel && (
+            <div className="flex items-center justify-between border-t border-dashed border-arena pt-2 text-xs">
+              <span className="text-humo">Método de pago</span>
+              <span className="font-semibold text-carbon">{paymentLabel}</span>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="mt-1 grid w-full grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={onClose}
-          className="cursor-pointer rounded-xl border border-arena bg-white px-4 py-3 text-sm font-semibold text-carbon transition-colors hover:border-fuego focus-visible:ring-2 focus-visible:ring-fuego focus-visible:outline-none"
-        >
-          Cerrar
-        </button>
-        <button
-          type="button"
-          onClick={onGoToMenu}
-          className="cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
-        >
-          {isSuccess ? 'Hacer otro pedido' : 'Volver al menú'}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onGoToMenu}
+        className="mt-1 w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
+      >
+        {isSuccess ? 'Hacer otro pedido' : 'Volver al menú'}
+      </button>
 
       <div className="mt-2 flex items-center gap-4 border-t border-arena pt-4">
         <span className="text-xs font-semibold tracking-wider text-humo uppercase">Síguenos</span>

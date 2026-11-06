@@ -1,42 +1,26 @@
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { OFFERS } from '../data/offers'
-import { formatPrice } from '../utils/formatPrice'
-
-function OfferCard({ offer }) {
-  return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-arena/50 bg-crema shadow-[0_18px_40px_-24px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-1 hover:border-dorado hover:shadow-[0_26px_50px_-20px_rgba(241,90,36,0.55)]">
-      <div className="relative aspect-square overflow-hidden bg-arena/50 lg:aspect-auto lg:h-[clamp(320px,54svh,460px)]">
-        <img
-          src={offer.image}
-          alt={offer.title}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
-        />
-        <span className="absolute top-3 left-3 rounded-full bg-brasa px-3 py-1 text-xs font-black tracking-wide text-white uppercase shadow-lg">
-          {offer.tag}
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col border-t border-arena/60 p-4">
-        <h3 className="mb-1 text-base font-bold text-carbon sm:text-lg">
-          {offer.title}
-        </h3>
-        <p className="mb-3 line-clamp-2 flex-1 text-sm text-humo">
-          {offer.description}
-        </p>
-        <div className="flex items-center gap-3 border-t border-dashed border-arena pt-3">
-          <span className="text-xs text-humo line-through sm:text-sm">
-            {formatPrice(offer.originalPrice)}
-          </span>
-          <span className="text-xl font-black text-fuego-oscuro sm:text-2xl">
-            {formatPrice(offer.price)}
-          </span>
-        </div>
-      </div>
-    </article>
-  )
-}
+import OfferCard from './OfferCard'
 
 function Offers() {
+  const { hash, key } = useLocation()
+  const [highlightedId, setHighlightedId] = useState(null)
+
+  useEffect(() => {
+    const id = hash.replace('#', '')
+    const match = OFFERS.find((offer) => offer.id === id)
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHighlightedId(match?.id ?? null)
+
+    if (!match) return
+
+    const timer = window.setTimeout(() => setHighlightedId(null), 2600)
+    return () => window.clearTimeout(timer)
+    // `key` cambia en cada navegación y permite re-resaltar la misma oferta.
+  }, [hash, key])
+
   return (
     <section
       id="offers"
@@ -64,11 +48,18 @@ function Offers() {
           <h2 className="text-2xl font-black text-crema sm:text-3xl md:text-4xl">
             Ofertas del día
           </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-crema/70">
+            Toca la imagen de una oferta para ver el detalle, dejar tu comentario y agregarla al carrito.
+          </p>
         </div>
 
         <div id="offers-grid" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {OFFERS.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} />
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              isHighlighted={highlightedId === offer.id}
+            />
           ))}
         </div>
       </div>

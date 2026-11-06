@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { scrollToSection } from '../utils/scrollToSection'
 
 function ScrollManager() {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash, key } = useLocation()
 
   useEffect(() => {
     if (hash) {
@@ -15,7 +15,9 @@ function ScrollManager() {
     }
 
     window.scrollTo(0, 0)
-  }, [pathname, hash])
+    // `key` cambia en cada navegación, así que repetir el mismo CTA vuelve a
+    // desplazarse aunque el hash sea idéntico.
+  }, [pathname, hash, key])
 
   return null
 }

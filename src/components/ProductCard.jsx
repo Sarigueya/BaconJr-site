@@ -2,14 +2,11 @@ import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
 
 function ProductCard({ product, onView }) {
-  const { addItem, increment, decrement, getQuantity } = useCart()
+  const { addItem, setItemQuantity, getQuantity } = useCart()
   const quantity = getQuantity(product.id)
 
   return (
-    <article
-      onClick={() => onView?.(product)}
-      className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-arena bg-white transition-all duration-300 hover:-translate-y-1 hover:border-fuego hover:shadow-[0_22px_40px_-24px_rgba(241,90,36,0.55)]"
-    >
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-arena bg-white transition-all duration-300 hover:-translate-y-1 hover:border-fuego hover:shadow-[0_22px_40px_-24px_rgba(241,90,36,0.55)]">
       <button
         type="button"
         onClick={(event) => {
@@ -66,7 +63,7 @@ function ProductCard({ product, onView }) {
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation()
-                  decrement(product.id)
+                  setItemQuantity(product, quantity - 1)
                 }}
                 className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label={`Quitar uno de ${product.name}`}
@@ -80,7 +77,7 @@ function ProductCard({ product, onView }) {
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation()
-                  increment(product.id)
+                  setItemQuantity(product, quantity + 1)
                 }}
                 className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label={`Agregar uno más de ${product.name}`}
