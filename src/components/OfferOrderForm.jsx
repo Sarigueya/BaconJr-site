@@ -1,32 +1,41 @@
-import { useId, useState } from 'react'
-import { useCart } from '../context/cart-context'
+import { useId } from 'react'
 import { formatPrice } from '../utils/formatPrice'
+import useLineOrder from '../hooks/useLineOrder'
 
 function OfferOrderForm({ offer, onAdded }) {
-  const { setItemQuantity, getLineQuantity } = useCart()
-  const [note, setNote] = useState('')
-  const [quantity, setQuantity] = useState(() => Math.max(1, getLineQuantity(offer.id, note)))
+  const {
+    note,
+    setNote,
+    quantity,
+    isInCart,
+    canSubmit,
+    decreaseQuantity,
+    increaseQuantity,
+    submit,
+  } = useLineOrder(offer, 1)
   const noteId = useId()
 
-  const lineQuantity = getLineQuantity(offer.id, note)
-  const isInCart = lineQuantity > 0
-
-  const updateQuantity = (next) => {
-    setQuantity(next)
-    if (getLineQuantity(offer.id, note) > 0) {
-      // La línea ya existe en el carrito: mantenemos la cantidad sincronizada.
-      setItemQuantity(offer, next, { note })
-    }
-  }
-
-  const decreaseQuantity = () => updateQuantity(Math.max(0, quantity - 1))
-  const increaseQuantity = () => updateQuantity(Math.min(20, quantity + 1))
+  const isRemoval = quantity === 0 && isInCart
+  const submitLabel = isRemoval
+    ? 'Quitar del carrito'
+    : isInCart
+      ? 'Actualizar en el carrito'
+      : 'Agregar al carrito'
 
   const handleAdd = () => {
-    // Cantidad absoluta: si la línea ya existe se actualiza, no se suma encima.
-    setItemQuantity(offer, quantity, { note })
-    setQuantity(quantity)
+    if (!submit()) return
+
     onAdded?.()
+  }
+
+  const handleDecrease = () => {
+    if (quantity <= 0) return
+    decreaseQuantity()
+  }
+
+  const handleIncrease = () => {
+    if (quantity >= 20) return
+    increaseQuantity()
   }
 
   return (
@@ -36,7 +45,7 @@ function OfferOrderForm({ offer, onAdded }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={decreaseQuantity}
+            onClick={handleDecrease}
             disabled={quantity <= 0}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-crema font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
             aria-label="Quitar una unidad"
@@ -48,7 +57,7 @@ function OfferOrderForm({ offer, onAdded }) {
           </span>
           <button
             type="button"
-            onClick={increaseQuantity}
+            onClick={handleIncrease}
             disabled={quantity >= 20}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-crema font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
             aria-label="Agregar una unidad"
@@ -68,21 +77,27 @@ function OfferOrderForm({ offer, onAdded }) {
         <textarea
           id={noteId}
           value={note}
-          onChange={(event) => setNote(event.target.value)}
+          onChange={setNote}
           rows={2}
           maxLength={180}
           placeholder="Ej. sin cebolla, salsa aparte, término medio…"
+          autoComplete="off"
+          aria-describedby={`${noteId}-count`}
           className="w-full resize-none rounded-xl border border-arena bg-white px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
         />
-        <p className="mt-1 text-right text-[11px] text-humo">{note.length}/180</p>
+        <p id={`${noteId}-count`} className="mt-1 text-right text-[11px] text-humo">
+          {note.length}/180
+        </p>
       </div>
 
       <button
         type="button"
         onClick={handleAdd}
-        className="w-full rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+        disabled={!canSubmit}
+        className="w-full rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {isInCart ? 'Actualizar en el carrito' : 'Agregar al carrito'} · {formatPrice(offer.price * quantity)}
+        {submitLabel}
+        {quantity > 0 ? ` · ${formatPrice(offer.price * quantity)}` : ''}
       </button>
     </div>
   )

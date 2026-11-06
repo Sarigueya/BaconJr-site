@@ -48,9 +48,6 @@ function Offers() {
           <h2 className="text-2xl font-black text-crema sm:text-3xl md:text-4xl">
             Ofertas del día
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-crema/70">
-            Toca la imagen de una oferta para ver el detalle, dejar tu comentario y agregarla al carrito.
-          </p>
         </div>
 
         <div id="offers-grid" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,6 +59,10 @@ function Offers() {
             />
           ))}
         </div>
+
+        <p className="mx-auto mt-5 max-w-xl text-center text-xs text-crema/60 sm:mt-6 sm:text-sm">
+          Toca la imagen de una oferta para ver el detalle, dejar tu comentario y agregarla al carrito.
+        </p>
       </div>
     </section>
   )

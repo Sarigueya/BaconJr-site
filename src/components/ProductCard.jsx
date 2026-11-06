@@ -2,7 +2,7 @@ import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
 
 function ProductCard({ product, onView }) {
-  const { addItem, setItemQuantity, getQuantity } = useCart()
+  const { adjustProductQuantity, getQuantity } = useCart()
   const quantity = getQuantity(product.id)
 
   return (
@@ -49,10 +49,7 @@ function ProductCard({ product, onView }) {
           {quantity === 0 ? (
             <button
               type="button"
-              onClick={(event) => {
-                event.stopPropagation()
-                addItem(product)
-              }}
+              onClick={() => adjustProductQuantity(product, 1)}
               className="cursor-pointer rounded-lg bg-fuego-oscuro px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego focus-visible:ring-offset-2"
             >
               Agregar
@@ -61,10 +58,7 @@ function ProductCard({ product, onView }) {
             <div className="flex items-center gap-3 rounded-lg border border-arena bg-crema px-2 py-1">
               <button
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  setItemQuantity(product, quantity - 1)
-                }}
+                onClick={() => adjustProductQuantity(product, -1)}
                 className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label={`Quitar uno de ${product.name}`}
               >
@@ -75,10 +69,7 @@ function ProductCard({ product, onView }) {
               </span>
               <button
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  setItemQuantity(product, quantity + 1)
-                }}
+                onClick={() => adjustProductQuantity(product, 1)}
                 className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-fuego-oscuro hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label={`Agregar uno más de ${product.name}`}
               >

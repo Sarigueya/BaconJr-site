@@ -66,6 +66,32 @@ export function CartProvider({ children }) {
     })
   }, [])
 
+  const adjustProductQuantity = useCallback((product, delta) => {
+    const step = delta > 0 ? 1 : -1
+
+    setItems((prev) => {
+      const matches = prev.filter((item) => item.id === product.id)
+
+      // Si no existe ninguna línea para el producto, agregamos una base.
+      if (matches.length === 0) {
+        if (delta < 0) return prev
+        return [...prev, { ...product, lineId: product.id, note: '', quantity: 1 }]
+      }
+
+      // Preferimos la línea sin nota y, si no existe, la última con nota.
+      const target =
+        matches.find((item) => getItemKey(item) === product.id) ?? matches[matches.length - 1]
+      const targetKey = getItemKey(target)
+      const nextQuantity = Math.min(20, Math.max(0, target.quantity + step))
+
+      if (nextQuantity <= 0) {
+        return prev.filter((item) => getItemKey(item) !== targetKey)
+      }
+
+      return prev.map((item) => (getItemKey(item) === targetKey ? { ...item, quantity: nextQuantity } : item))
+    })
+  }, [])
+
   const clearCart = useCallback(() => setItems([]), [])
 
   const getQuantity = useCallback(
@@ -98,6 +124,7 @@ export function CartProvider({ children }) {
       items,
       addItem,
       setItemQuantity,
+      adjustProductQuantity,
       getLineQuantity,
       removeItem,
       clearCart,
@@ -109,6 +136,7 @@ export function CartProvider({ children }) {
       items,
       addItem,
       setItemQuantity,
+      adjustProductQuantity,
       getLineQuantity,
       removeItem,
       clearCart,

@@ -230,6 +230,11 @@ function LocationModalContent({ onClose, onConfirm }) {
         lat: Number(results[0].lat),
         lng: Number(results[0].lon),
       }
+
+      if (!Number.isFinite(next.lat) || !Number.isFinite(next.lng)) {
+        throw new Error('Coordenadas inválidas')
+      }
+
       setPosition(next)
       setSelectedStoreId(findNearestStore(next).id)
       setMapView(next)
@@ -310,16 +315,24 @@ function LocationModalContent({ onClose, onConfirm }) {
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Escribe tu dirección"
+              maxLength={120}
+              autoComplete="street-address"
+              enterKeyHint="search"
+              placeholder="Calle y número, por favor"
               className="w-full rounded-lg border border-arena px-4 py-3 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
             />
             <button
               type="submit"
-              className="shrink-0 cursor-pointer rounded-lg bg-fuego-oscuro px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+              disabled={!query.trim() || status === 'loading'}
+              className="shrink-0 cursor-pointer rounded-lg bg-fuego-oscuro px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego disabled:cursor-not-allowed disabled:opacity-40"
             >
               Buscar
             </button>
           </form>
+
+          {status === 'loading' && (
+            <p className="mt-2 text-center text-xs text-humo">Buscando dirección…</p>
+          )}
 
           <button
             type="button"
@@ -434,7 +447,9 @@ function LocationModalContent({ onClose, onConfirm }) {
           <button
             type="button"
             onClick={handleConfirm}
-            className="cursor-pointer rounded-lg bg-fuego-oscuro px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+            disabled={status === 'loading'}
+            aria-busy={status === 'loading'}
+            className="cursor-pointer rounded-lg bg-fuego-oscuro px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado disabled:cursor-not-allowed disabled:opacity-40"
           >
             Confirmar ubicación
           </button>

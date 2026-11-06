@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -10,6 +11,9 @@ import MenuPage from './pages/MenuPage'
 import { CartProvider } from './context/CartProvider'
 
 function App() {
+  // Panel flotante abierto actualmente ('cart' | 'chat' | null): solo uno a la vez.
+  const [activePanel, setActivePanel] = useState(null)
+
   return (
     <CartProvider>
       <div className="min-h-screen bg-white text-carbon">
@@ -23,8 +27,14 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <ChatbotWidget />
-        <CartButton />
+        <ChatbotWidget
+          isOpen={activePanel === 'chat'}
+          onToggle={() => setActivePanel((prev) => (prev === 'chat' ? null : 'chat'))}
+        />
+        <CartButton
+          isOpen={activePanel === 'cart'}
+          onOpenChange={(open) => setActivePanel(open ? 'cart' : null)}
+        />
         <DailyOfferModal />
       </div>
     </CartProvider>

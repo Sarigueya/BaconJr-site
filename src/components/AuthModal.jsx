@@ -2,8 +2,15 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 function AuthModal({ isOpen, onClose }) {
   const [mode, setMode] = useState('login') // 'login' | 'register'
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errors, setErrors] = useState({})
 
   useBodyScrollLock(isOpen)
 
@@ -23,11 +30,51 @@ function AuthModal({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
+  const switchMode = (nextMode) => {
+    setMode(nextMode)
+    setErrors({})
+  }
+
+  const clearError = (field) => {
+    setErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
+  const validate = () => {
+    const nextErrors = {}
+    const cleanEmail = email.trim()
+    const isValidEmail = EMAIL_REGEX.test(cleanEmail)
+
+    if (mode === 'register') {
+      if (name.trim().length < 2) nextErrors.name = 'Escribe tu nombre completo.'
+      if (!isValidEmail) nextErrors.email = 'Ingresa un correo electrónico válido.'
+      if (password.length < 8) nextErrors.password = 'La contraseña debe tener al menos 8 caracteres.'
+      if (password !== confirmPassword) nextErrors.confirmPassword = 'Las contraseñas no coinciden.'
+    } else {
+      if (!isValidEmail) nextErrors.email = 'Ingresa un correo electrónico válido.'
+      if (password.length < 1) nextErrors.password = 'Ingresa tu contraseña.'
+    }
+
+    return nextErrors
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
+    const nextErrors = validate()
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
     // Mockup: por ahora no hay lógica real de autenticación.
     onClose()
   }
+
+  const inputClass = (invalid) =>
+    `w-full px-4 py-2.5 border rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego bg-white ${
+      invalid ? 'border-brasa' : 'border-arena'
+    }`
 
   return createPortal(
     <div
@@ -47,10 +94,10 @@ function AuthModal({ isOpen, onClose }) {
             <h2 className="text-xl font-bold text-carbon">
               {mode === 'login' ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
             </h2>
-            <p className="text-sm text-humo mt-1">
+            <p className="mt-1 text-sm text-humo">
               {mode === 'login'
                 ? 'Ingresa con tus credenciales para continuar tu pedido.'
-                 : 'Regístrate para empezar a ordenar en BACON JR.'}
+                : 'Regístrate para empezar a ordenar en BACON JR.'}
             </p>
           </div>
           <button
@@ -59,7 +106,7 @@ function AuthModal({ isOpen, onClose }) {
             className="p-1 -mr-1 text-humo hover:text-fuego-oscuro transition-colors"
             aria-label="Cerrar"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -70,7 +117,7 @@ function AuthModal({ isOpen, onClose }) {
           <div className="flex border border-arena rounded-lg overflow-hidden">
             <button
               type="button"
-              onClick={() => setMode('login')}
+              onClick={() => switchMode('login')}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 mode === 'login'
                   ? 'bg-fuego text-carbon'
@@ -81,7 +128,7 @@ function AuthModal({ isOpen, onClose }) {
             </button>
             <button
               type="button"
-              onClick={() => setMode('register')}
+              onClick={() => switchMode('register')}
               className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                 mode === 'register'
                   ? 'bg-fuego text-carbon'
@@ -94,56 +141,122 @@ function AuthModal({ isOpen, onClose }) {
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 px-6 py-5">
           {mode === 'register' && (
             <div>
-              <label htmlFor="auth-name" className="block text-xs font-semibold text-humo mb-1">
+              <label htmlFor="auth-name" className="mb-1 block text-xs font-semibold text-humo">
                 Nombre completo
               </label>
               <input
                 id="auth-name"
                 type="text"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value)
+                  clearError('name')
+                }}
+                required
+                minLength={2}
+                maxLength={80}
+                autoComplete="name"
+                autoCapitalize="words"
                 placeholder="Tu nombre"
-                className="w-full px-4 py-2.5 border border-arena rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego"
+                className={inputClass(errors.name ? true : false)}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? 'auth-name-error' : undefined}
               />
+              {errors.name && (
+                <p id="auth-name-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                  {errors.name}
+                </p>
+              )}
             </div>
           )}
 
           <div>
-            <label htmlFor="auth-email" className="block text-xs font-semibold text-humo mb-1">
+            <label htmlFor="auth-email" className="mb-1 block text-xs font-semibold text-humo">
               Correo electrónico
             </label>
             <input
               id="auth-email"
               type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value)
+                clearError('email')
+              }}
+              required
+              inputMode="email"
+              autoComplete="email"
+              maxLength={120}
+              spellCheck={false}
               placeholder="tucorreo@ejemplo.com"
-              className="w-full px-4 py-2.5 border border-arena rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego"
+              className={inputClass(Boolean(errors.email))}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? 'auth-email-error' : undefined}
             />
+            {errors.email && (
+              <p id="auth-email-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                {errors.email}
+              </p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="auth-password" className="block text-xs font-semibold text-humo mb-1">
+            <label htmlFor="auth-password" className="mb-1 block text-xs font-semibold text-humo">
               Contraseña
             </label>
             <input
               id="auth-password"
               type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                clearError('password')
+              }}
+              required
+              minLength={8}
+              maxLength={64}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               placeholder="••••••••"
-              className="w-full px-4 py-2.5 border border-arena rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego"
+              className={inputClass(Boolean(errors.password))}
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? 'auth-password-error' : undefined}
             />
+            {errors.password && (
+              <p id="auth-password-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                {errors.password}
+              </p>
+            )}
           </div>
 
           {mode === 'register' && (
             <div>
-              <label htmlFor="auth-password-confirm" className="block text-xs font-semibold text-humo mb-1">
+              <label htmlFor="auth-password-confirm" className="mb-1 block text-xs font-semibold text-humo">
                 Confirmar contraseña
               </label>
               <input
                 id="auth-password-confirm"
                 type="password"
+                value={confirmPassword}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value)
+                  clearError('confirmPassword')
+                }}
+                required
+                minLength={8}
+                maxLength={64}
+                autoComplete="new-password"
                 placeholder="••••••••"
-                className="w-full px-4 py-2.5 border border-arena rounded-lg text-sm text-carbon placeholder-humo focus:outline-none focus:ring-2 focus:ring-fuego"
+                className={inputClass(Boolean(errors.confirmPassword))}
+                aria-invalid={Boolean(errors.confirmPassword)}
+                aria-describedby={errors.confirmPassword ? 'auth-confirm-error' : undefined}
               />
+              {errors.confirmPassword && (
+                <p id="auth-confirm-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
           )}
 
@@ -174,7 +287,7 @@ function AuthModal({ isOpen, onClose }) {
                 ¿No tienes cuenta?{' '}
                 <button
                   type="button"
-                  onClick={() => setMode('register')}
+                  onClick={() => switchMode('register')}
                   className="font-semibold text-carbon hover:underline"
                 >
                   Regístrate aquí
@@ -185,7 +298,7 @@ function AuthModal({ isOpen, onClose }) {
                 ¿Ya tienes cuenta?{' '}
                 <button
                   type="button"
-                  onClick={() => setMode('login')}
+                  onClick={() => switchMode('login')}
                   className="font-semibold text-carbon hover:underline"
                 >
                   Inicia sesión

@@ -63,10 +63,25 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   const pickupStore =
     NEARBY_STORES.find((store) => store.id === pickupStoreId) ?? NEARBY_STORES[0]
 
+  const trimmedDeliveryName = deliveryName.trim()
+  const trimmedDeliveryAddress = deliveryAddress.trim()
+
+  const addressError = !trimmedDeliveryAddress
+    ? 'Escribe tu dirección de entrega.'
+    : trimmedDeliveryAddress.length < 5
+      ? 'La dirección debe tener al menos 5 caracteres.'
+      : !/\d/.test(trimmedDeliveryAddress)
+        ? 'Incluye al menos un número (altura o número de casa).'
+        : ''
+
+  const nameError = trimmedDeliveryName.length < 2 ? 'Escribe el nombre de quien recibe.' : ''
+
+  const isDeliveryValid = !addressError && !nameError
   const isFulfillmentValid =
-    fulfillment === 'delivery'
-      ? deliveryName.trim().length >= 2 && deliveryAddress.trim().length >= 5
-      : fulfillment === 'pickup' && Boolean(pickupStoreId)
+    fulfillment === 'delivery' ? isDeliveryValid : fulfillment === 'pickup' && Boolean(pickupStoreId)
+
+  const handleDeliveryNameChange = (value) => setDeliveryName(value)
+  const handleDeliveryAddressChange = (value) => setDeliveryAddress(value)
 
   const handleCancel = () => {
     clearCart()
@@ -115,7 +130,7 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
     fulfillment === 'delivery'
       ? {
           label: 'Entrega a domicilio',
-          detail: `${deliveryName} · ${deliveryAddress}`,
+          detail: `${trimmedDeliveryName} · ${trimmedDeliveryAddress}`,
         }
       : {
           label: 'Recoger en sucursal',
@@ -163,13 +178,15 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
             onSelect={setFulfillment}
             deliveryName={deliveryName}
             deliveryAddress={deliveryAddress}
-            onDeliveryNameChange={setDeliveryName}
-            onDeliveryAddressChange={setDeliveryAddress}
+            onDeliveryNameChange={handleDeliveryNameChange}
+            onDeliveryAddressChange={handleDeliveryAddressChange}
             pickupStoreId={pickupStoreId}
             onPickupStoreChange={setPickupStoreId}
             onBack={() => setStep('invoice')}
             onContinue={() => setStep('payment')}
             isValid={isFulfillmentValid}
+            addressError={fulfillment === 'delivery' ? addressError : ''}
+            nameError={fulfillment === 'delivery' ? nameError : ''}
           />
         )}
 
@@ -178,8 +195,8 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
             titleId={titleId}
             order={order}
             fulfillment={fulfillment}
-            deliveryName={deliveryName}
-            deliveryAddress={deliveryAddress}
+            deliveryName={trimmedDeliveryName}
+            deliveryAddress={trimmedDeliveryAddress}
             pickupStore={pickupStore}
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
@@ -423,6 +440,8 @@ function FulfillmentStep({
   onBack,
   onContinue,
   isValid,
+  addressError,
+  nameError,
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -486,12 +505,24 @@ function FulfillmentStep({
                 onChange={(event) => onDeliveryAddressChange(event.target.value)}
                 rows={2}
                 maxLength={140}
+                required
+                minLength={5}
+                autoComplete="street-address"
+                aria-invalid={Boolean(addressError)}
+                aria-describedby={addressError ? 'checkout-address-error' : 'checkout-address-count'}
                 placeholder="Calle, número, barrio y referencias…"
-                className="w-full resize-none rounded-xl border border-arena bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
+                className={`w-full resize-none rounded-xl border bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30 ${
+                  addressError ? 'border-brasa' : 'border-arena'
+                }`}
               />
-              <p className="mt-1 text-right text-[11px] text-humo">
-                {deliveryAddress.length}/140
+              <p id="checkout-address-count" className="mt-1 text-right text-[11px] text-humo">
+                {deliveryAddress.trim().length}/140
               </p>
+              {addressError && (
+                <p id="checkout-address-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                  {addressError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -507,9 +538,22 @@ function FulfillmentStep({
                 value={deliveryName}
                 onChange={(event) => onDeliveryNameChange(event.target.value)}
                 maxLength={60}
+                required
+                minLength={2}
+                autoComplete="name"
+                autoCapitalize="words"
+                aria-invalid={Boolean(nameError)}
+                aria-describedby={nameError ? 'checkout-name-error' : undefined}
                 placeholder="Nombre de quien recibe"
-                className="w-full rounded-xl border border-arena bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
+                className={`w-full rounded-xl border bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30 ${
+                  nameError ? 'border-brasa' : 'border-arena'
+                }`}
               />
+              {nameError && (
+                <p id="checkout-name-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                  {nameError}
+                </p>
+              )}
             </div>
 
             <p className="text-[11px] text-humo">
@@ -823,13 +867,15 @@ function ResultStep({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={onGoToMenu}
-        className="mt-1 w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
-      >
-        {isSuccess ? 'Hacer otro pedido' : 'Volver al menú'}
-      </button>
+      {!isSuccess && (
+        <button
+          type="button"
+          onClick={onGoToMenu}
+          className="mt-1 w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
+        >
+          Volver al menú
+        </button>
+      )}
 
       <div className="mt-2 flex items-center gap-4 border-t border-arena pt-4">
         <span className="text-xs font-semibold tracking-wider text-humo uppercase">Síguenos</span>

@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
 import { CATEGORIES } from '../data/products'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import useLineOrder from '../hooks/useLineOrder'
 
 function ProductModal({ product, onClose }) {
   if (!product) return null
@@ -12,9 +12,16 @@ function ProductModal({ product, onClose }) {
 }
 
 function ProductModalContent({ product, onClose }) {
-  const { setItemQuantity, getLineQuantity } = useCart()
-  const [note, setNote] = useState('')
-  const [quantity, setQuantity] = useState(() => Math.max(1, getLineQuantity(product.id, note)))
+  const {
+    note,
+    setNote,
+    quantity,
+    isInCart,
+    canSubmit,
+    decreaseQuantity,
+    increaseQuantity,
+    submit,
+  } = useLineOrder(product, 1)
   const closeButtonRef = useRef(null)
 
   useBodyScrollLock()
@@ -36,16 +43,28 @@ function ProductModalContent({ product, onClose }) {
     CATEGORIES.find((category) => category.id === product.category)?.label ??
     'Menú'
 
-  const lineQuantity = getLineQuantity(product.id, note)
-  const isInCart = lineQuantity > 0
-
   const handleAdd = () => {
-    setItemQuantity(product, quantity, { note })
+    if (!submit()) return
+
     onClose()
   }
 
-  const decreaseQuantity = () => setQuantity((prev) => Math.max(0, prev - 1))
-  const increaseQuantity = () => setQuantity((prev) => Math.min(20, prev + 1))
+  const handleDecrease = () => {
+    if (quantity <= 0) return
+    decreaseQuantity()
+  }
+
+  const handleIncrease = () => {
+    if (quantity >= 20) return
+    increaseQuantity()
+  }
+
+  let addLabel = 'Agregar al carrito'
+  let showAmount = false
+  if (canSubmit) {
+    addLabel = isInCart && quantity === 0 ? 'Quitar del carrito' : isInCart ? 'Actualizar carrito' : 'Agregar al carrito'
+    if (quantity > 0) showAmount = true
+  }
 
   return createPortal(
     <div
@@ -104,8 +123,8 @@ function ProductModalContent({ product, onClose }) {
             <div className="flex items-center gap-4">
               <button
                 type="button"
-                onClick={decreaseQuantity}
-                disabled={quantity === 1}
+                onClick={handleDecrease}
+                disabled={quantity <= 0}
                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white font-bold text-carbon shadow-sm transition-colors hover:bg-fuego-oscuro hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label="Quitar una unidad"
               >
@@ -116,8 +135,8 @@ function ProductModalContent({ product, onClose }) {
               </span>
               <button
                 type="button"
-                onClick={increaseQuantity}
-                disabled={quantity === 20}
+                onClick={handleIncrease}
+                disabled={quantity >= 20}
                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white font-bold text-carbon shadow-sm transition-colors hover:bg-fuego-oscuro hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
                 aria-label="Agregar una unidad"
               >
@@ -133,13 +152,15 @@ function ProductModalContent({ product, onClose }) {
             <textarea
               id="product-note"
               value={note}
-              onChange={(event) => setNote(event.target.value)}
+              onChange={setNote}
               rows={3}
               maxLength={180}
               placeholder="Ej. término medio, sin cebolla, salsa aparte…"
+              autoComplete="off"
+              aria-describedby="product-note-count"
               className="w-full resize-none rounded-xl border border-arena bg-crema px-4 py-3 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"
             />
-            <p className="mt-1 text-right text-[11px] text-humo">
+            <p id="product-note-count" className="mt-1 text-right text-[11px] text-humo">
               {note.length}/180
             </p>
           </div>
@@ -155,11 +176,11 @@ function ProductModalContent({ product, onClose }) {
             <button
               type="button"
               onClick={handleAdd}
-              disabled={quantity <= 0 && lineQuantity <= 0}
+              disabled={!canSubmit}
               className="flex-1 cursor-pointer rounded-xl bg-fuego-oscuro px-5 py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isInCart ? 'Actualizar carrito' : 'Agregar al carrito'} ·{' '}
-              {formatPrice(product.price * quantity)}
+              {addLabel}
+              {showAmount ? ` · ${formatPrice(product.price * quantity)}` : ''}
             </button>
           </div>
         </div>
