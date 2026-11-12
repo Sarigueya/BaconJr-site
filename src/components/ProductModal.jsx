@@ -40,6 +40,7 @@ function ProductModalContent({ product, onClose }) {
   }, [onClose])
 
   const categoryLabel =
+    product.categoryLabel ??
     CATEGORIES.find((category) => category.id === product.category)?.label ??
     'Menú'
 
@@ -92,7 +93,7 @@ function ProductModalContent({ product, onClose }) {
 
         <div className="relative aspect-[4/3] bg-crema md:aspect-auto md:min-h-[26rem]">
           <img
-            src={product.image}
+            src={product.imageLarge ?? product.image}
             alt={product.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
@@ -117,6 +118,32 @@ function ProductModalContent({ product, onClose }) {
               {formatPrice(product.price)}
             </p>
           </div>
+
+          {product.ingredients?.length > 0 && (
+            <div className="rounded-2xl border border-arena px-4 py-3">
+              <h3 className="text-sm font-semibold text-carbon">Ingredientes</h3>
+              <ul className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-sm text-humo sm:grid-cols-2">
+                {product.ingredients.map((ingredient) => (
+                  <li key={ingredient.name} className="flex items-baseline gap-1.5">
+                    <span className="h-1.5 w-1.5 shrink-0 translate-y-[-2px] rounded-full bg-fuego" aria-hidden="true" />
+                    <span>
+                      {ingredient.name}
+                      {ingredient.measure && <span className="text-humo/70"> · {ingredient.measure}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {product.instructions && (
+                <details className="mt-3 text-sm text-humo">
+                  <summary className="cursor-pointer font-semibold text-carbon hover:text-fuego-oscuro">
+                    ¿Cómo se prepara?
+                  </summary>
+                  <p className="mt-2 leading-relaxed">{product.instructions}</p>
+                  {product.glass && <p className="mt-1 text-xs">Se sirve en: {product.glass}</p>}
+                </details>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between rounded-2xl border border-arena bg-crema px-4 py-3">
             <span className="text-sm font-semibold text-carbon">Cantidad</span>
@@ -155,7 +182,7 @@ function ProductModalContent({ product, onClose }) {
               onChange={setNote}
               rows={3}
               maxLength={180}
-              placeholder="Ej. término medio, sin cebolla, salsa aparte…"
+              placeholder={product.notePlaceholder ?? 'Ej. término medio, sin cebolla, salsa aparte…'}
               autoComplete="off"
               aria-describedby="product-note-count"
               className="w-full resize-none rounded-xl border border-arena bg-crema px-4 py-3 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30"

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { CATEGORIES } from '../data/products'
+import { BUSINESS } from '../data/business'
 import { scrollToSection } from '../utils/scrollToSection'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
@@ -137,7 +138,7 @@ function MobileMenu({ isOpen, onClose, onOrder }) {
             Ordena ahora
           </button>
           <p className="mt-3 text-center text-xs text-arena/50">
-            Abierto todos los días · 12:00 – 22:00
+            {BUSINESS.hoursText}
           </p>
         </div>
       </aside>

@@ -1,4 +1,5 @@
 import Menu from '../components/Menu'
+import Cocktails from '../components/Cocktails'
 
 function MenuPage() {
   return (
@@ -21,6 +22,7 @@ function MenuPage() {
       </section>
 
       <Menu />
+      <Cocktails />
     </>
   )
 }

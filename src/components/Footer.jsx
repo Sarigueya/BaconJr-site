@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import SocialLinks from './SocialLinks'
+import { BUSINESS } from '../data/business'
 
 const FOOTER_LINKS = [
   {
@@ -22,11 +23,11 @@ const FOOTER_LINKS = [
   },
 ]
 
-// Datos de ejemplo: reemplázalos por los reales del negocio.
+// Los datos de contacto se editan en src/data/business.js.
 const CONTACT_INFO = [
   {
     label: 'Dirección',
-    value: 'Av. Principal #123, Neiva Huila, Colombia',
+    value: BUSINESS.address,
     icon: (
       <>
         <path d="M17.66 16.66 13.41 20.9a2 2 0 0 1-2.82 0l-4.25-4.24a8 8 0 1 1 11.32 0Z" />
@@ -36,7 +37,7 @@ const CONTACT_INFO = [
   },
   {
     label: 'Horario',
-    value: 'Lun a Jue 12:00 – 22:00 · Vie a Dom 12:00 – 23:00',
+    value: BUSINESS.hoursText,
     icon: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -46,7 +47,7 @@ const CONTACT_INFO = [
   },
   {
     label: 'Pedidos',
-    value: '+57 310 123 4567',
+    value: BUSINESS.phone,
     icon: (
       <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
     ),

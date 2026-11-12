@@ -19,6 +19,7 @@ export const PRODUCTS = [
   // Carnes
   {
     id: 'meat-1',
+    keywords: ['res', 'bife', 'filete', 'corte', 'steak'],
     category: 'meats',
     name: 'Ribeye a la parrilla',
     description: 'Corte premium de 300g, término a elección.',
@@ -27,6 +28,7 @@ export const PRODUCTS = [
   },
   {
     id: 'meat-2',
+    keywords: ['ribs', 'cerdo'],
     category: 'meats',
     name: 'Costillas BBQ',
     description: 'Costillas de cerdo bañadas en salsa BBQ ahumada.',
@@ -35,6 +37,7 @@ export const PRODUCTS = [
   },
   {
     id: 'meat-3',
+    keywords: ['pollo'],
     category: 'meats',
     name: 'Pechuga a la plancha',
     description: 'Pechuga de pollo marinada con hierbas.',
@@ -45,6 +48,7 @@ export const PRODUCTS = [
   // Bebidas
   {
     id: 'drink-1',
+    keywords: ['limon'],
     category: 'drinks',
     name: 'Limonada natural',
     description: 'Limonada fresca preparada al momento.',
@@ -53,6 +57,7 @@ export const PRODUCTS = [
   },
   {
     id: 'drink-2',
+    keywords: ['coca', 'gaseosa', 'soda'],
     category: 'drinks',
     name: 'Refresco de cola',
     description: 'Lata 355ml, bien fría.',
@@ -61,6 +66,7 @@ export const PRODUCTS = [
   },
   {
     id: 'drink-3',
+    keywords: ['chela', 'pola', 'birra'],
     category: 'drinks',
     name: 'Cerveza artesanal',
     description: 'Botella 355ml, elaboración local.',
@@ -71,6 +77,7 @@ export const PRODUCTS = [
   // Postres
   {
     id: 'dessert-1',
+    keywords: ['chocolate', 'helado'],
     category: 'desserts',
     name: 'Brownie con helado',
     description: 'Brownie tibio con bola de helado de vainilla.',
@@ -79,6 +86,7 @@ export const PRODUCTS = [
   },
   {
     id: 'dessert-2',
+    keywords: ['pastel', 'torta', 'tarta'],
     category: 'desserts',
     name: 'Cheesecake de frutos rojos',
     description: 'Rebanada individual con salsa de frutos rojos.',
@@ -87,6 +95,7 @@ export const PRODUCTS = [
   },
   {
     id: 'dessert-3',
+    keywords: ['pina', 'fruta'],
     category: 'desserts',
     name: 'Piña Asada',
     description: 'Piña fresca asada a la parrilla, caramelizada con un toque de canela.',
@@ -97,6 +106,7 @@ export const PRODUCTS = [
   // Acompañantes
   {
     id: 'side-1',
+    keywords: ['papitas', 'fritas'],
     category: 'sides',
     name: 'Papas a la francesa',
     description: 'Porción clásica, crujientes por fuera.',
@@ -105,6 +115,7 @@ export const PRODUCTS = [
   },
   {
     id: 'side-2',
+    keywords: ['cesar', 'ensaladas'],
     category: 'sides',
     name: 'Ensalada César',
     description: 'Lechuga romana, crutones y aderezo César.',
@@ -113,6 +124,7 @@ export const PRODUCTS = [
   },
   {
     id: 'side-3',
+    keywords: ['verduras'],
     category: 'sides',
     name: 'Arroz con vegetales',
     description: 'Arroz salteado con vegetales de temporada.',
@@ -123,6 +135,7 @@ export const PRODUCTS = [
   // Salsas
   {
     id: 'sauce-1',
+    keywords: ['bbq'],
     category: 'sauces',
     name: 'Salsa BBQ ahumada',
     description: 'Porción extra para acompañar tu corte.',
@@ -131,6 +144,7 @@ export const PRODUCTS = [
   },
   {
     id: 'sauce-2',
+    keywords: ['chimi'],
     category: 'sauces',
     name: 'Chimichurri',
     description: 'Receta clásica con perejil y ajo.',
@@ -139,6 +153,7 @@ export const PRODUCTS = [
   },
   {
     id: 'sauce-3',
+    keywords: ['ahumada'],
     category: 'sauces',
     name: 'Salsa de humo',
     description: 'Salsa casera con ahumado de leña, ideal para tus cortes.',

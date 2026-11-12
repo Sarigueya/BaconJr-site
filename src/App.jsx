@@ -30,6 +30,7 @@ function App() {
         <ChatbotWidget
           isOpen={activePanel === 'chat'}
           onToggle={() => setActivePanel((prev) => (prev === 'chat' ? null : 'chat'))}
+          onOpenCart={() => setActivePanel('cart')}
         />
         <CartButton
           isOpen={activePanel === 'cart'}
