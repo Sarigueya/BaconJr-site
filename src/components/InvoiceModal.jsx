@@ -1,24 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useCart } from '../context/cart-context'
+import { useAuth } from '../context/AuthProvider'
 import { formatPrice } from '../utils/formatPrice'
 import { LOCATION_STORAGE_KEY, NEARBY_STORES } from '../data/stores'
 import { FULFILLMENT_OPTIONS, PAYMENT_METHODS } from '../data/checkout'
 import SocialLinks from './SocialLinks'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
-
-// Pasos del checkout:
-// 'invoice'       -> resumen/factura del pedido
-// 'fulfillment'   -> para llevar (domicilio) o recoger en sucursal
-// 'payment'       -> método de pago y total
-// 'processing'    -> pago simulado en curso
-// 'success'       -> pedido exitoso
-// 'confirmCancel' -> "¿Seguro que quieres cancelar?"
-// 'cancelled'     -> pedido cancelado
-//
-// `order` es una "foto" del carrito tomada al abrir el checkout:
-// { number, date, items, totalItems, total }. Así el resumen se sigue
-// viendo aunque el carrito ya se haya limpiado.
 
 const PANEL_WIDTH = {
   invoice: 'sm:max-w-3xl',
@@ -43,13 +31,17 @@ function readStoredLocation() {
 }
 
 function InvoiceModal({ order, onClose, onGoToMenu }) {
+  const { currentUser, isAuthModalOpen, openAuthModal } = useAuth()
   const [storedLocation] = useState(readStoredLocation)
   const [step, setStep] = useState('invoice')
   const [fulfillment, setFulfillment] = useState(null)
-  const [deliveryName, setDeliveryName] = useState(storedLocation?.name ?? '')
-  const [deliveryAddress, setDeliveryAddress] = useState(
-    storedLocation?.address?.slice(0, 140) ?? ''
+  const [deliveryName, setDeliveryName] = useState(
+    currentUser?.name ?? storedLocation?.name ?? ''
   )
+  const [deliveryAddress, setDeliveryAddress] = useState(
+    (currentUser?.address ?? storedLocation?.address ?? '').slice(0, 140)
+  )
+  const [isEditingAddress, setIsEditingAddress] = useState(false)
   const [pickupStoreId, setPickupStoreId] = useState(
     storedLocation?.storeId ?? NEARBY_STORES[0].id
   )
@@ -59,6 +51,14 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   const paymentTimerRef = useRef(null)
 
   useBodyScrollLock()
+
+  // Cuando el usuario inicia sesión o crea cuenta desde la factura, se cargan su nombre y dirección
+  useEffect(() => {
+    if (!currentUser) return
+    setDeliveryName(currentUser.name || '')
+    setDeliveryAddress((currentUser.address || '').slice(0, 140))
+    setIsEditingAddress(false)
+  }, [currentUser])
 
   const pickupStore =
     NEARBY_STORES.find((store) => store.id === pickupStoreId) ?? NEARBY_STORES[0]
@@ -80,8 +80,13 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   const isFulfillmentValid =
     fulfillment === 'delivery' ? isDeliveryValid : fulfillment === 'pickup' && Boolean(pickupStoreId)
 
-  const handleDeliveryNameChange = (value) => setDeliveryName(value)
-  const handleDeliveryAddressChange = (value) => setDeliveryAddress(value)
+  const handleContinueFromInvoice = () => {
+    if (!currentUser) {
+      openAuthModal({ checkout: true })
+      return
+    }
+    setStep('fulfillment')
+  }
 
   const handleCancel = () => {
     clearCart()
@@ -90,6 +95,10 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
 
   const handlePayment = () => {
     if (step !== 'payment') return
+    if (!currentUser) {
+      openAuthModal({ checkout: true })
+      return
+    }
     setStep('processing')
     window.clearTimeout(paymentTimerRef.current)
     paymentTimerRef.current = window.setTimeout(() => {
@@ -99,13 +108,14 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   }
 
   const dismiss = useCallback(() => {
+    if (isAuthModalOpen) return
     if (step === 'processing') return
     if (step === 'confirmCancel') {
       setStep('invoice')
       return
     }
     onClose()
-  }, [step, onClose])
+  }, [isAuthModalOpen, step, onClose])
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -117,7 +127,6 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
 
   useEffect(() => () => window.clearTimeout(paymentTimerRef.current), [])
 
-  // Al cambiar de paso, el foco pasa al panel para lectores de pantalla y teclado.
   useEffect(() => {
     panelRef.current?.focus()
   }, [step])
@@ -166,8 +175,15 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
           <InvoiceStep
             titleId={titleId}
             order={order}
+            currentUser={currentUser}
+            deliveryAddress={deliveryAddress}
+            onDeliveryAddressChange={setDeliveryAddress}
+            isEditingAddress={isEditingAddress}
+            onToggleEditAddress={() => setIsEditingAddress((prev) => !prev)}
+            addressError={addressError}
+            onOpenAuth={() => openAuthModal({ checkout: true })}
             onAskCancel={() => setStep('confirmCancel')}
-            onContinue={() => setStep('fulfillment')}
+            onContinue={handleContinueFromInvoice}
           />
         )}
 
@@ -178,8 +194,8 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
             onSelect={setFulfillment}
             deliveryName={deliveryName}
             deliveryAddress={deliveryAddress}
-            onDeliveryNameChange={handleDeliveryNameChange}
-            onDeliveryAddressChange={handleDeliveryAddressChange}
+            onDeliveryNameChange={setDeliveryName}
+            onDeliveryAddressChange={setDeliveryAddress}
             pickupStoreId={pickupStoreId}
             onPickupStoreChange={setPickupStoreId}
             onBack={() => setStep('invoice')}
@@ -305,7 +321,19 @@ function CheckoutProgress({ current }) {
   )
 }
 
-function InvoiceStep({ titleId, order, onAskCancel, onContinue }) {
+function InvoiceStep({
+  titleId,
+  order,
+  currentUser,
+  deliveryAddress,
+  onDeliveryAddressChange,
+  isEditingAddress,
+  onToggleEditAddress,
+  addressError,
+  onOpenAuth,
+  onAskCancel,
+  onContinue,
+}) {
   return (
     <>
       {/* Encabezado */}
@@ -339,7 +367,67 @@ function InvoiceStep({ titleId, order, onAskCancel, onContinue }) {
             </span>
           </div>
 
-          {/* Detalle */}
+          {/* Bloque de Cliente y Dirección guardada (o invitación a iniciar sesión) */}
+          <div className="border-b border-arena bg-white/80 px-6 py-3.5">
+            {currentUser ? (
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold tracking-wider text-humo uppercase">
+                      Cliente y dirección de entrega
+                    </p>
+                    <p className="mt-0.5 text-sm font-bold text-carbon">
+                      {currentUser.name}{' '}
+                      {currentUser.phone && (
+                        <span className="font-normal text-xs text-humo">· {currentUser.phone}</span>
+                      )}
+                    </p>
+                    {!isEditingAddress && (
+                      <p className="mt-0.5 text-xs text-humo">{deliveryAddress}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onToggleEditAddress}
+                    className="shrink-0 cursor-pointer rounded-lg border border-arena bg-crema px-2.5 py-1 text-xs font-semibold text-fuego-oscuro transition-colors hover:border-fuego"
+                  >
+                    {isEditingAddress ? 'Listo' : 'Cambiar dirección'}
+                  </button>
+                </div>
+
+                {isEditingAddress && (
+                  <div>
+                    <input
+                      type="text"
+                      value={deliveryAddress}
+                      onChange={(e) => onDeliveryAddressChange(e.target.value)}
+                      maxLength={140}
+                      placeholder="Nueva dirección de entrega..."
+                      className="w-full rounded-lg border border-arena bg-crema px-3 py-2 text-xs text-carbon focus:border-fuego focus:outline-none"
+                    />
+                    {addressError && (
+                      <p className="mt-1 text-[11px] font-medium text-brasa">{addressError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-humo">
+                  Inicia sesión o crea una cuenta para usar tu dirección guardada y confirmar el pedido.
+                </p>
+                <button
+                  type="button"
+                  onClick={onOpenAuth}
+                  className="shrink-0 cursor-pointer rounded-lg bg-carbon px-3 py-1.5 text-xs font-bold text-dorado transition-colors hover:bg-fuego-oscuro hover:text-white"
+                >
+                  Iniciar sesión
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Detalle de productos */}
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
             <div className="mb-2 grid grid-cols-[1fr_auto] gap-4 text-[11px] font-bold tracking-wider text-humo uppercase">
               <span>Detalle</span>
@@ -403,9 +491,10 @@ function InvoiceStep({ titleId, order, onAskCancel, onContinue }) {
             <button
               type="button"
               onClick={onContinue}
-              className="w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
+              disabled={Boolean(currentUser && isEditingAddress && addressError)}
+              className="w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
             >
-              Continuar con el pedido
+              {currentUser ? 'Confirmar pedido' : 'Iniciar sesión para confirmar'}
             </button>
             <button
               type="button"
@@ -497,7 +586,7 @@ function FulfillmentStep({
                 htmlFor="checkout-address"
                 className="mb-1 block text-xs font-semibold text-humo"
               >
-                Dirección de entrega
+                Dirección de entrega (precargada de tu cuenta)
               </label>
               <textarea
                 id="checkout-address"
@@ -509,17 +598,13 @@ function FulfillmentStep({
                 minLength={5}
                 autoComplete="street-address"
                 aria-invalid={Boolean(addressError)}
-                aria-describedby={addressError ? 'checkout-address-error' : 'checkout-address-count'}
                 placeholder="Calle, número, barrio y referencias…"
                 className={`w-full resize-none rounded-xl border bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30 ${
                   addressError ? 'border-brasa' : 'border-arena'
                 }`}
               />
-              <p id="checkout-address-count" className="mt-1 text-right text-[11px] text-humo">
-                {deliveryAddress.trim().length}/140
-              </p>
               {addressError && (
-                <p id="checkout-address-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                <p role="alert" className="mt-1 text-xs font-medium text-brasa">
                   {addressError}
                 </p>
               )}
@@ -541,24 +626,17 @@ function FulfillmentStep({
                 required
                 minLength={2}
                 autoComplete="name"
-                autoCapitalize="words"
-                aria-invalid={Boolean(nameError)}
-                aria-describedby={nameError ? 'checkout-name-error' : undefined}
                 placeholder="Nombre de quien recibe"
                 className={`w-full rounded-xl border bg-crema px-3 py-2 text-sm text-carbon placeholder-humo transition-colors focus:border-fuego focus:outline-none focus:ring-2 focus:ring-fuego/30 ${
                   nameError ? 'border-brasa' : 'border-arena'
                 }`}
               />
               {nameError && (
-                <p id="checkout-name-error" role="alert" className="mt-1 text-xs font-medium text-brasa">
+                <p role="alert" className="mt-1 text-xs font-medium text-brasa">
                   {nameError}
                 </p>
               )}
             </div>
-
-            <p className="text-[11px] text-humo">
-              Completa la dirección y el nombre para continuar al pago.
-            </p>
           </div>
         )}
 
@@ -848,39 +926,27 @@ function ResultStep({
             </span>
             <span className="font-black">{formatPrice(order.total)}</span>
           </div>
-
           {fulfillment && (
-            <div className="border-t border-dashed border-arena pt-2">
-              <p className="text-[11px] font-bold tracking-wider text-humo uppercase">
-                {fulfillment.label}
-              </p>
-              <p className="mt-0.5 text-xs break-words text-carbon">{fulfillment.detail}</p>
+            <div className="border-t border-arena pt-2 text-xs">
+              <p className="font-bold text-carbon">{fulfillment.label}</p>
+              <p className="text-humo">{fulfillment.detail}</p>
             </div>
           )}
-
           {paymentLabel && (
-            <div className="flex items-center justify-between border-t border-dashed border-arena pt-2 text-xs">
-              <span className="text-humo">Método de pago</span>
-              <span className="font-semibold text-carbon">{paymentLabel}</span>
-            </div>
+            <p className="border-t border-arena pt-2 text-xs text-humo">
+              Método de pago: <span className="font-semibold text-carbon">{paymentLabel}</span>
+            </p>
           )}
         </div>
       )}
 
-      {!isSuccess && (
-        <button
-          type="button"
-          onClick={onGoToMenu}
-          className="mt-1 w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
-        >
-          Volver al menú
-        </button>
-      )}
-
-      <div className="mt-2 flex items-center gap-4 border-t border-arena pt-4">
-        <span className="text-xs font-semibold tracking-wider text-humo uppercase">Síguenos</span>
-        <SocialLinks variant="light" />
-      </div>
+      <button
+        type="button"
+        onClick={onGoToMenu}
+        className="mt-2 w-full cursor-pointer rounded-xl bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none"
+      >
+        Volver al menú
+      </button>
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
-import AuthModal from './AuthModal'
 import MobileMenu from './MobileMenu'
 import { scrollToSection } from '../utils/scrollToSection'
+import { useAuth } from '../context/AuthProvider'
 
 const NAV_LINKS = [
   { label: 'Menú', to: '/menu' },
@@ -13,16 +13,15 @@ const NAV_LINKS = [
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isPastHero, setIsPastHero] = useState(false)
   const [isPastMenuFilters, setIsPastMenuFilters] = useState(false)
   const navBarRef = useRef(null)
   const location = useLocation()
 
+  const { currentUser, openAuthModal, logout } = useAuth()
+
   const toggleMenu = () => setIsMenuOpen((prev) => !prev)
   const closeMenu = useCallback(() => setIsMenuOpen(false), [])
-  const openAuthModal = () => setIsAuthModalOpen(true)
-  const closeAuthModal = () => setIsAuthModalOpen(false)
 
   const isMenuPage = location.pathname === '/menu'
 
@@ -38,7 +37,6 @@ function Navbar() {
     const hero = document.getElementById('hero')
 
     if (hero) {
-      // Reset al cambiar de ruta antes de observar de nuevo el hero.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsPastHero(false)
 
@@ -192,21 +190,47 @@ function Navbar() {
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center justify-end">
-            <button
-              type="button"
-              onClick={openAuthModal}
-              className="inline-flex cursor-pointer items-center rounded-lg bg-fuego-oscuro px-4 py-2 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 sm:px-5 sm:py-2.5 sm:text-sm"
-            >
-              Ordena ahora
-            </button>
+          <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
+            {currentUser ? (
+              <>
+                <span
+                  className={`max-w-[115px] truncate text-xs font-semibold sm:max-w-[180px] sm:text-sm ${
+                    useDarkOnMenu || !isLight ? 'text-crema' : 'text-carbon'
+                  }`}
+                  title={currentUser.name}
+                >
+                  {currentUser.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={`inline-flex cursor-pointer items-center rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all duration-200 sm:px-4 sm:py-2 sm:text-sm ${
+                    useDarkOnMenu || !isLight
+                      ? 'border-crema/40 text-crema hover:border-dorado hover:text-dorado'
+                      : 'border-arena text-carbon hover:border-fuego-oscuro hover:text-fuego-oscuro'
+                  }`}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openAuthModal({ checkout: false })}
+                className="inline-flex cursor-pointer items-center rounded-lg bg-fuego-oscuro px-4 py-2 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 sm:px-5 sm:py-2.5 sm:text-sm"
+              >
+                Iniciar sesión
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} onOrder={openAuthModal} />
-
-      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
+      <MobileMenu
+        isOpen={isMenuOpen}
+        onClose={closeMenu}
+        onOrder={() => openAuthModal({ checkout: false })}
+      />
     </nav>
   )
 }
