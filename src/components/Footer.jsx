@@ -1,85 +1,194 @@
-const FOOTER_LINKS = {
-  menu: [
-    { label: 'Cortes', href: '#menu' },
-    { label: 'Costillas', href: '#menu' },
-    { label: 'Pollo', href: '#menu' },
-    { label: 'Acompañamientos', href: '#menu' },
-  ],
-  company: [
-    { label: 'Nuestra Historia', href: '#about' },
-    { label: 'Empleo', href: '#' },
-    { label: 'Prensa', href: '#' },
-  ],
-  support: [
-    { label: 'Contacto', href: '#' },
-    { label: 'FAQ', href: '#' },
-    { label: 'Privacidad', href: '#' },
-    { label: 'Términos', href: '#' },
-  ],
+import { useRef } from 'react'
+import { Link } from 'react-router-dom'
+import logo from '../assets/brand/logoBaconjrv2.svg'
+import SocialLinks from './SocialLinks'
+import { BUSINESS } from '../data/business'
+import { useGsapReveal, useGsapStaggerReveal } from '../hooks/useGsapReveal'
+
+const FOOTER_LINKS = [
+  {
+    title: 'Menú',
+    links: [
+      { label: 'Carnes', href: '/menu?category=meats' },
+      { label: 'Acompañantes', href: '/menu?category=sides' },
+      { label: 'Bebidas', href: '/menu?category=drinks' },
+      { label: 'Postres', href: '/menu?category=desserts' },
+      { label: 'Salsas', href: '/menu?category=sauces' },
+    ],
+  },
+  {
+    title: 'Bacon Jr.',
+    links: [
+      { label: 'Nuestra historia', href: '/#about' },
+      { label: 'Ofertas del día', href: '/#offers' },
+    ],
+  },
+]
+
+// Los datos de contacto se editan en src/data/business.js.
+const CONTACT_INFO = [
+  {
+    label: 'Dirección',
+    value: BUSINESS.address,
+    icon: (
+      <>
+        <path d="M17.66 16.66 13.41 20.9a2 2 0 0 1-2.82 0l-4.25-4.24a8 8 0 1 1 11.32 0Z" />
+        <path d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      </>
+    ),
+  },
+  {
+    label: 'Horario',
+    value: BUSINESS.hoursText,
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
+  },
+  {
+    label: 'Pedidos',
+    value: BUSINESS.phone,
+    icon: (
+      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
+    ),
+  },
+]
+
+function FooterLink({ href, className, children }) {
+  return (
+    <Link to={href} className={className}>
+      {children}
+    </Link>
+  )
+}
+
+function FooterHeading({ children }) {
+  return (
+    <h4 className="mb-5 flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-dorado uppercase">
+      <span className="h-px w-5 bg-fuego" aria-hidden="true" />
+      {children}
+    </h4>
+  )
 }
 
 function Footer() {
+  const logoRef = useRef(null)
+  const columnsRef = useRef(null)
+
+  useGsapReveal(logoRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 14 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+  })
+
+  useGsapStaggerReveal(columnsRef, '[data-footer-col]', {
+    from: { autoAlpha: 0, y: 18 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.1 },
+  })
+
   return (
-    <footer className="bg-neutral-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          <div>
-            <span className="text-xl font-bold tracking-tight">BACON JR.</span>
-            <p className="text-neutral-400 text-sm mt-3 leading-relaxed">
-              Asados al barril desde 1995. Sabor, tradición y calidad
-              en cada corte.
+    <footer className="relative isolate overflow-hidden bg-carbon text-crema">
+      {/* Línea y resplandor de brasa en la parte superior */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brasa via-fuego to-dorado"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-80 w-[48rem] -translate-x-1/2 rounded-full bg-fuego/10 blur-3xl"
+      />
+
+      <div className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 lg:px-8">
+        {/* Llamado a la acción */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-fuego-oscuro via-fuego-profundo to-brasa px-6 py-8 shadow-[0_24px_60px_-24px_rgba(241,90,36,0.6)] sm:px-10 md:flex md:items-center md:justify-between md:gap-8">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -bottom-24 h-64 w-64 rounded-full bg-dorado/25 blur-3xl"
+          />
+          <div className="relative">
+            <p className="text-xs font-bold tracking-[0.2em] text-dorado uppercase">
+              Recién salido del barril
+            </p>
+            <h3 className="mt-2 text-2xl leading-tight font-black text-white sm:text-3xl">
+              ¿Se te antojó un buen asado?
+            </h3>
+            <p className="mt-2 max-w-md text-sm text-crema/80">
+              Haz tu pedido en minutos y recíbelo caliente en tu puerta.
             </p>
           </div>
+          <Link
+            to="/menu?category=all"
+            className="relative mt-6 inline-flex shrink-0 items-center gap-2 rounded-xl bg-carbon px-6 py-3 text-sm font-bold text-dorado transition-all duration-300 hover:-translate-y-0.5 hover:bg-carbon-suave hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado md:mt-0"
+          >
+            Pedir ahora
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
 
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
-              Menú
-            </h4>
-            <ul className="space-y-2">
-              {FOOTER_LINKS.menu.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+        {/* Columnas principales */}
+        <div ref={columnsRef} className="grid grid-cols-1 gap-12 py-14 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <div data-footer-col className="sm:col-span-2 lg:col-span-4">
+            <Link to="/" aria-label="Bacon Jr. — Inicio" className="inline-block">
+              <img ref={logoRef} src={logo} alt="Bacon Jr." className="h-14 w-auto" />
+            </Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-arena/70">
+              Asados al barril desde 1995. Sabor, tradición y calidad en cada corte.
+            </p>
+            <p className="mt-6 mb-3 text-xs font-semibold tracking-[0.2em] text-arena/50 uppercase">
+              Síguenos
+            </p>
+            <SocialLinks />
           </div>
 
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
-              Empresa
-            </h4>
-            <ul className="space-y-2">
-              {FOOTER_LINKS.company.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {FOOTER_LINKS.map((column) => (
+            <div key={column.title} data-footer-col className="lg:col-span-2">
+              <FooterHeading>{column.title}</FooterHeading>
+              <ul className="space-y-3">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <FooterLink
+                      href={link.href}
+                      className="group inline-flex items-center gap-2 text-sm text-arena/70 transition-colors hover:text-llama"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-1.5 w-0 rounded-full bg-fuego transition-all duration-300 group-hover:w-1.5"
+                      />
+                      {link.label}
+                    </FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">
-              Soporte
-            </h4>
-            <ul className="space-y-2">
-              {FOOTER_LINKS.support.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-neutral-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
+          <div data-footer-col className="sm:col-span-2 lg:col-span-4">
+            <FooterHeading>Visítanos</FooterHeading>
+            <ul className="space-y-4">
+              {CONTACT_INFO.map((item) => (
+                <li key={item.label} className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-carbon-suave text-llama ring-1 ring-crema/10">
+                    <svg
+                      className="h-[18px] w-[18px]"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      {item.icon}
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-xs font-semibold text-crema">{item.label}</p>
+                    <p className="text-sm leading-relaxed text-arena/70">{item.value}</p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -87,28 +196,12 @@ function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-neutral-500">
-            &copy; 2026 BACON JR. Todos los derechos reservados.
+      {/* Barra inferior */}
+      <div className="border-t border-crema/10">
+        <div className="mx-auto max-w-7xl px-4 py-6 text-center sm:px-6 lg:px-8">
+          <p className="text-xs text-humo">
+            &copy; {new Date().getFullYear()} BACON JR. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-4">
-            <a href="#" className="text-neutral-500 hover:text-white transition-colors" aria-label="Facebook">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-              </svg>
-            </a>
-            <a href="#" className="text-neutral-500 hover:text-white transition-colors" aria-label="Instagram">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-              </svg>
-            </a>
-            <a href="#" className="text-neutral-500 hover:text-white transition-colors" aria-label="TikTok">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46v-7.13a8.16 8.16 0 005.58 2.19V11.2a4.85 4.85 0 01-3.77-1.63V6.69h3.77z" />
-              </svg>
-            </a>
-          </div>
         </div>
       </div>
     </footer>

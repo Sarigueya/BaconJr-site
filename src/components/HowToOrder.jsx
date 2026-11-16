@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { useGsapStaggerReveal } from '../hooks/useGsapReveal'
+
 const STEPS = [
   {
     id: 1,
@@ -50,37 +53,52 @@ const STEPS = [
 ]
 
 function HowToOrder() {
+  const stepsRef = useRef(null)
+
+  useGsapStaggerReveal(stepsRef, '[data-step]', {
+    from: { autoAlpha: 0, y: 22 },
+    to: {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+      stagger: 0.1,
+      clearProps: 'transform',
+    },
+  })
+
   return (
-    <section className="bg-neutral-100 py-16 md:py-24">
+    <section className="bg-white py-10 md:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-3">
+        <div className="text-center mb-8 md:mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-3">
             ¿Cómo pedir?
           </h2>
-          <p className="text-neutral-500 max-w-md mx-auto">
+          <p className="text-humo max-w-md mx-auto">
             Pedir en Bacon Jr. nunca fue tan fácil. Sigue estos tres pasos
             y disfruta del mejor sabor al carbón.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div ref={stepsRef} className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
           {STEPS.map((step) => (
-            <div
-              key={step.id}
-              className="relative rounded-2xl bg-white p-7 shadow-lg hover:-translate-y-1 transition-transform"
-            >
-              <span className="absolute top-4 right-6 text-5xl font-bold text-neutral-100 select-none">
-                {step.number}
-              </span>
+            <div key={step.id} data-step>
+              <div
+                className="group relative h-full rounded-2xl border-2 border-fuego/70 bg-white p-6 shadow-[0_16px_34px_-24px_rgba(28,20,16,0.65)] transition-all duration-300 hover:-translate-y-1 hover:border-fuego hover:shadow-[0_24px_40px_-20px_rgba(241,90,36,0.45)]"
+              >
+                <span className="absolute top-3 right-5 text-5xl font-black text-arena/70 select-none transition-colors duration-300 group-hover:text-fuego/20">
+                  {step.number}
+                </span>
 
-              <div className="w-16 h-16 rounded-xl bg-black text-white flex items-center justify-center mb-5">
-                {step.icon}
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-fuego text-white shadow-[0_10px_20px_-10px_rgba(241,90,36,0.9)] transition-transform duration-300 group-hover:scale-105">
+                  {step.icon}
+                </div>
+
+                <h3 className="text-xl font-bold text-carbon mb-2">{step.title}</h3>
+                <p className="text-humo text-sm leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-
-              <h3 className="text-xl font-bold text-black mb-2">{step.title}</h3>
-              <p className="text-neutral-600 text-sm leading-relaxed">
-                {step.description}
-              </p>
             </div>
           ))}
         </div>

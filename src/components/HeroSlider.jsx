@@ -1,5 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BannerCard from './BannerCard'
+import OfferModal from './OfferModal'
+import { OFFERS } from '../data/offers'
+import { prefersReducedMotion } from '../utils/motion'
+import carouselCostillas from '../assets/offers/carousel-costillas-bbq.svg'
+import carouselComboFamiliar from '../assets/offers/carousel-combo-familiar.svg'
+import carouselHappyHour from '../assets/offers/carousel-happy-hour.svg'
 
 const BANNERS = [
   {
@@ -7,18 +14,30 @@ const BANNERS = [
     title: 'Especiales de Temporada',
     subtitle: 'Costillas BBQ con precio especial.',
     cta: 'Ver oferta',
+    action: 'detail',
+    offerId: 'offer-costillas',
+    image: carouselCostillas,
+    imageMode: 'cutout',
   },
   {
     id: 2,
     title: 'Combo Familiar',
-    subtitle: 'Para 4 personas, solo $690.',
+    subtitle: 'Para 6 personas, solo $690.',
     cta: 'Ordenar',
+    action: 'order',
+    offerId: 'offer-combo-familiar',
+    image: carouselComboFamiliar,
+    imageMode: 'cover',
   },
   {
     id: 3,
     title: 'Happy Hour',
     subtitle: '2x1 en bebidas de lunes a viernes.',
     cta: 'Más info',
+    action: 'detail',
+    offerId: 'offer-happy-hour',
+    image: carouselHappyHour,
+    imageMode: 'cover',
   },
 ]
 
@@ -27,7 +46,9 @@ const SLIDE_INTERVAL = 4000
 function HeroSlider() {
   const [current, setCurrent] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [selectedOffer, setSelectedOffer] = useState(null)
   const timerRef = useRef(null)
+  const navigate = useNavigate()
 
   const goToNext = useCallback(() => {
     setCurrent((prev) => (prev + 1) % BANNERS.length)
@@ -38,7 +59,7 @@ function HeroSlider() {
   }, [])
 
   useEffect(() => {
-    if (isPaused) {
+    if (isPaused || prefersReducedMotion()) {
       clearInterval(timerRef.current)
       return
     }
@@ -48,28 +69,69 @@ function HeroSlider() {
     return () => clearInterval(timerRef.current)
   }, [isPaused, goToNext])
 
+  const closeOfferModal = useCallback(() => setSelectedOffer(null), [])
+
+  const handleCta = (banner) => {
+    if (banner.action === 'order') {
+      const offer = OFFERS.find((item) => item.id === banner.offerId)
+      if (offer) setSelectedOffer(offer)
+      return
+    }
+
+    navigate({ pathname: '/', hash: banner.offerId })
+  }
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      goToPrev()
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      goToNext()
+    }
+  }
+
+  const handleBlur = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsPaused(false)
+    }
+  }
+
   return (
     <section
-      className="relative w-full overflow-hidden"
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label="Ofertas destacadas"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={handleBlur}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      className="relative h-[76vh] max-h-[880px] min-h-[420px] w-full overflow-hidden bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-inset"
     >
       <div
-        className="flex transition-transform duration-500 ease-in-out"
+        className="flex h-full transition-transform duration-500 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {BANNERS.map((banner) => (
-          <BannerCard key={banner.id} {...banner} />
+        {BANNERS.map((banner, index) => (
+          <BannerCard
+            key={banner.id}
+            {...banner}
+            isActive={index === current}
+            onCta={() => handleCta(banner)}
+          />
         ))}
       </div>
 
       <button
         type="button"
         onClick={goToPrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        className="absolute top-1/2 left-3 z-20 hidden h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-carbon/60 text-white backdrop-blur transition-all duration-200 hover:scale-105 hover:border-dorado hover:bg-fuego hover:text-white focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none sm:flex md:left-6"
         aria-label="Slide anterior"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
@@ -77,32 +139,33 @@ function HeroSlider() {
       <button
         type="button"
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 hidden sm:flex items-center justify-center bg-black/40 text-white rounded-full hover:bg-black/60 transition-colors"
+        className="absolute top-1/2 right-3 z-20 hidden h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-carbon/60 text-white backdrop-blur transition-all duration-200 hover:scale-105 hover:border-dorado hover:bg-fuego hover:text-white focus-visible:ring-2 focus-visible:ring-dorado focus-visible:outline-none sm:flex md:right-6"
         aria-label="Siguiente slide"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
-        {BANNERS.map((_, index) => (
+      <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+        {BANNERS.map((banner, index) => (
           <button
-            key={index}
+            key={banner.id}
             type="button"
             onClick={() => setCurrent(index)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === current ? 'w-8 bg-white' : 'w-3 bg-white/40'
+            className={`h-2 cursor-pointer rounded-full transition-all duration-300 hover:bg-dorado focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 focus-visible:ring-offset-carbon focus-visible:outline-none ${
+              index === current ? 'w-9 bg-dorado' : 'w-3 bg-white/40 hover:w-5'
             }`}
-            aria-label={`Go to slide ${index + 1}`}
+            aria-label={`Ir al slide ${index + 1}`}
+            aria-current={index === current}
           />
         ))}
       </div>
 
-      <div className="absolute bottom-0 left-0 h-1 bg-white/30 w-full">
+      <div className="absolute right-0 bottom-0 left-0 z-20 h-1 bg-white/20">
         <div
           key={current}
-          className="h-full bg-white transition-[width] ease-linear"
+          className="h-full bg-gradient-to-r from-fuego to-dorado transition-[width] ease-linear"
           style={{
             width: isPaused ? '0%' : '100%',
             animationName: 'autoProgress',
@@ -112,6 +175,8 @@ function HeroSlider() {
           }}
         />
       </div>
+
+      <OfferModal offer={selectedOffer} onClose={closeOfferModal} />
     </section>
   )
 }

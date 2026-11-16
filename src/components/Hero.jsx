@@ -1,49 +1,95 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import gsap from 'gsap'
 import LocationModal from './LocationModal'
+import { LOCATION_STORAGE_KEY } from '../data/stores'
+import { useGsapReveal } from '../hooks/useGsapReveal'
+import { prefersReducedMotion } from '../utils/motion'
+import heroBackground from '../assets/hero/hero-background.png'
+
+const readStoredLocation = () => {
+  try {
+    const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return typeof parsed?.lat === 'number' ? parsed : null
+  } catch {
+    return null
+  }
+}
 
 function Hero() {
   const [isLocationOpen, setIsLocationOpen] = useState(false)
+  const [userLocation, setUserLocation] = useState(readStoredLocation)
+  const heroRef = useRef(null)
+  const contentRef = useRef(null)
+
+  useGsapReveal(contentRef, {
+    from: { autoAlpha: 0, y: 20 },
+    to: { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' },
+  })
+
+  // La imagen del hero es un fondo CSS: animamos su posición para dar profundidad.
+  useEffect(() => {
+    if (!heroRef.current || prefersReducedMotion()) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        heroRef.current,
+        { backgroundPosition: '50% 42%' },
+        { backgroundPosition: '50% 50%', duration: 1.6, ease: 'power2.out' }
+      )
+    }, heroRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section className="relative bg-neutral-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold tracking-widest uppercase text-neutral-400 mb-4">
+    <section
+      ref={heroRef}
+      id="hero"
+      className="relative flex min-h-[80vh] items-center overflow-hidden bg-carbon bg-cover bg-center bg-no-repeat pt-[var(--navbar-height)] text-crema"
+      style={{ backgroundImage: `url(${heroBackground})` }}
+    >
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:pb-14 md:pb-20">
+        <div ref={contentRef} className="max-w-2xl">
+          <p className="text-sm font-semibold tracking-widest uppercase text-dorado mb-4">
             Asados al Barril
           </p>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
             ¿Cómo quieres hoy tu pedido?
           </h1>
-          <p className="text-lg text-neutral-300 mb-8 max-w-lg">
+          <p className="text-lg text-arena mb-8 max-w-lg">
             Carne seleccionada, cocinada al carbón con el sazón que solo
             una tradición de generaciones puede dar.
           </p>
           <div className="flex flex-wrap gap-4">
-            <a
-              href="#menu"
-              className="inline-flex items-center px-6 py-3 bg-white text-black text-sm font-semibold rounded-lg hover:bg-neutral-200 transition-colors"
+            <Link
+              to="/menu?category=all"
+              className="inline-flex cursor-pointer items-center rounded-lg bg-fuego-oscuro px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-fuego-profundo hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               Pick up
-            </a>
-            <a
-              href="#menu"
-              className="inline-flex items-center px-6 py-3 border border-white text-white text-sm font-semibold rounded-lg hover:bg-white hover:text-black transition-colors"
+            </Link>
+            <Link
+              to="/menu?category=all"
+              className="inline-flex cursor-pointer items-center rounded-lg border border-dorado px-6 py-3 text-sm font-semibold text-dorado transition-all duration-200 hover:-translate-y-0.5 hover:bg-dorado hover:text-carbon hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               Delivery
-            </a>
+            </Link>
           </div>
 
           <div className="mt-8">
             <button
               type="button"
               onClick={() => setIsLocationOpen(true)}
-              className="flex items-center w-full max-w-md bg-white/10 backdrop-blur border border-white/20 rounded-full px-5 py-3 text-left hover:bg-white/15 transition-colors"
+              className="flex w-full max-w-md cursor-pointer items-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-left backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-dorado/60 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
             >
               <svg
-                className="w-5 h-5 text-neutral-300 mr-3 shrink-0"
+                className="mr-3 w-5 h-5 shrink-0 text-llama"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -53,18 +99,35 @@ function Hero() {
                 />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-sm text-neutral-300">¿Dónde te encuentras?</span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm text-arena">
+                  {userLocation
+                    ? `Entregar en ${userLocation.address?.split(',')[0] ?? 'tu ubicación'}`
+                    : '¿Dónde te encuentras?'}
+                </span>
+                {userLocation?.storeName && (
+                  <span className="mt-0.5 block truncate text-[11px] text-dorado">
+                    Sucursal: {userLocation.storeName}
+                  </span>
+                )}
+              </span>
             </button>
-            <p className="text-xs text-neutral-400 mt-2">
-              Encuentra tu Bacon Jr. más cercano.
+            <p className="mt-2 text-xs text-arena/70">
+              {userLocation
+                ? 'Haz clic para cambiar tu ubicación de entrega.'
+                : 'Encuentra tu Bacon Jr. más cercano.'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-neutral-800 to-neutral-950" />
+      <div className="absolute inset-0 bg-gradient-to-r from-carbon/90 via-carbon/70 to-carbon/30" />
 
-      <LocationModal isOpen={isLocationOpen} onClose={() => setIsLocationOpen(false)} />
+      <LocationModal
+        isOpen={isLocationOpen}
+        onClose={() => setIsLocationOpen(false)}
+        onConfirm={setUserLocation}
+      />
     </section>
   )
 }

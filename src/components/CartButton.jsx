@@ -1,121 +1,224 @@
-import { useState } from 'react'
-import { useCart } from '../context/CartContext'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useCart } from '../context/cart-context'
+import { formatPrice } from '../utils/formatPrice'
+import InvoiceModal from './InvoiceModal'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
-function formatPrice(price) {
-  return `$${price}`
-}
+function CartButton({ isOpen, onOpenChange }) {
+  const [order, setOrder] = useState(null) // foto del pedido mostrada en la factura
+  const [confirmClear, setConfirmClear] = useState(false)
+  const panelRef = useRef(null)
+  const floatButtonRef = useRef(null)
+  const { items, removeItem, clearCart, totalItems, totalPrice, setItemQuantity } = useCart()
 
-function CartButton() {
-  const [isOpen, setIsOpen] = useState(false)
-  const { items, increment, decrement, removeItem, totalItems, totalPrice } = useCart()
+  const closeCart = useCallback(() => {
+    setConfirmClear(false)
+    onOpenChange(false)
+  }, [onOpenChange])
+
+  useBodyScrollLock(isOpen)
+  useFocusTrap(panelRef, isOpen)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeCart()
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, closeCart])
+
+  const navigate = useNavigate()
+
+  const openCheckout = () => {
+    setOrder({
+      number: `BJ-${String(Date.now()).slice(-5)}`,
+      date: new Date().toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short' }),
+      items: items.map((item) => ({ ...item })),
+      totalItems,
+      total: totalPrice,
+    })
+    closeCart()
+  }
+
+  const closeCheckout = () => setOrder(null)
+
+  const goToMenu = () => {
+    setOrder(null)
+    navigate('/menu?category=all')
+  }
 
   return (
     <>
-      {/* Panel del carrito */}
+      {/* Backdrop + panel del carrito */}
       {isOpen && (
-        <div
-          className="fixed bottom-44 right-6 z-50 w-[92vw] max-w-sm max-h-[60vh] bg-white border border-neutral-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Carrito de compras"
-        >
-          <div className="flex items-center justify-between px-4 py-3 bg-black text-white">
-            <h2 className="text-sm font-bold tracking-wide">TU PEDIDO</h2>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="p-1 text-white/80 hover:text-white transition-colors"
-              aria-label="Cerrar carrito"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {items.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center px-6 py-10">
-              <p className="text-sm text-neutral-400 text-center">
-                Tu carrito está vacío. Agrega productos desde el menú.
-              </p>
-            </div>
-          ) : (
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-neutral-50">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-black truncate">{item.name}</p>
-                    <p className="text-xs text-neutral-500">
-                      {formatPrice(item.price)} c/u
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-1.5 bg-neutral-100 rounded-lg px-1.5 py-1">
-                      <button
-                        type="button"
-                        onClick={() => decrement(item.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-black font-bold hover:bg-neutral-200 transition-colors"
-                        aria-label={`Quitar uno de ${item.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="text-xs font-semibold text-black w-4 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => increment(item.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md bg-white text-black font-bold hover:bg-neutral-200 transition-colors"
-                        aria-label={`Agregar uno más de ${item.name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="p-1 text-neutral-400 hover:text-black transition-colors"
-                      aria-label={`Quitar ${item.name} del carrito`}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {items.length > 0 && (
-            <div className="px-4 py-4 border-t border-neutral-200 bg-white space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-500">Total</span>
-                <span className="text-lg font-bold text-black">{formatPrice(totalPrice)}</span>
-              </div>
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-carbon/30 backdrop-blur-sm"
+            onClick={closeCart}
+            aria-hidden="true"
+          />
+          <div
+            ref={panelRef}
+            tabIndex={-1}
+            className="fixed bottom-44 right-6 z-50 flex max-h-[calc(100vh-13rem)] w-[92vw] max-w-sm flex-col overflow-hidden rounded-2xl border border-arena bg-white shadow-2xl outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-panel-title"
+          >
+            <div className="flex items-center justify-between bg-carbon px-4 py-3 text-crema">
+              <h2
+                id="cart-panel-title"
+                className="text-sm font-bold tracking-[0.2em] text-dorado uppercase"
+              >
+                TU PEDIDO
+              </h2>
               <button
                 type="button"
-                className="w-full py-3 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
+                onClick={closeCart}
+                className="rounded-full p-1 text-crema/70 transition-colors hover:text-dorado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+                aria-label="Cerrar carrito"
               >
-                Continuar pedido
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-          )}
-        </div>
+
+            {items.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center px-6 py-10">
+                <p className="text-center text-sm text-humo">
+                  Tu carrito está vacío. Agrega productos desde el menú.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 space-y-3 overflow-y-auto bg-crema px-4 py-3">
+                  {items.map((item) => {
+                    const lineId = item.lineId ?? item.id
+                    return (
+                      <div
+                        key={lineId}
+                        className="flex items-center justify-between rounded-lg border border-arena bg-white px-3 py-2"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-carbon">{item.name}</p>
+                          <p className="text-xs text-humo">{formatPrice(item.price)} c/u</p>
+                          {item.note && (
+                            <p className="mt-1 line-clamp-2 text-xs italic text-fuego-oscuro">
+                              Nota: {item.note}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <div className="flex items-center gap-1.5 rounded-lg bg-crema px-1.5 py-1">
+                            <button
+                              type="button"
+                              onClick={() => setItemQuantity(item, item.quantity - 1, { note: item.note })}
+                              className="flex h-6 w-6 items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-arena"
+                              aria-label={`Quitar uno de ${item.name}`}
+                            >
+                              −
+                            </button>
+                            <span className="w-4 text-center text-xs font-semibold text-carbon">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setItemQuantity(item, item.quantity + 1, { note: item.note })}
+                              className="flex h-6 w-6 items-center justify-center rounded-md bg-white font-bold text-carbon transition-colors hover:bg-arena"
+                              aria-label={`Agregar uno más de ${item.name}`}
+                            >
+                              +
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(lineId)}
+                            className="p-1 text-humo transition-colors hover:text-fuego-oscuro"
+                            aria-label={`Quitar ${item.name} del carrito`}
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {confirmClear ? (
+                  <div className="space-y-3 border-t border-arena bg-white px-4 py-4">
+                    <p className="text-sm font-bold text-carbon">¿Vaciar tu carrito?</p>
+                    <p className="text-xs leading-relaxed text-humo">
+                      Se eliminarán todos los productos que agregaste. Esta acción no se puede deshacer.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmClear(false)}
+                        className="flex-1 cursor-pointer rounded-lg border border-arena px-4 py-2.5 text-sm font-semibold text-carbon transition-colors hover:border-fuego focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearCart()
+                          setConfirmClear(false)
+                        }}
+                        className="flex-1 cursor-pointer rounded-lg bg-brasa px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brasa/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+                      >
+                        Sí, vaciar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  items.length > 0 && (
+                    <div className="space-y-3 border-t border-arena bg-white px-4 py-4">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmClear(true)}
+                        className="w-full cursor-pointer rounded-lg border border-arena px-4 py-2 text-xs font-semibold text-humo transition-colors hover:border-brasa hover:text-brasa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuego"
+                      >
+                        Vaciar carrito
+                      </button>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-humo">Total</span>
+                        <span className="text-lg font-bold text-carbon">{formatPrice(totalPrice)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openCheckout}
+                        className="w-full cursor-pointer rounded-lg bg-fuego-oscuro px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-fuego-profundo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+                      >
+                        Hacer pedido
+                      </button>
+                    </div>
+                  )
+                )}
+              </>
+            )}
+          </div>
+        </>
       )}
 
       {/* Botón flotante del carrito */}
       <button
+        ref={floatButtonRef}
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="fixed bottom-24 right-6 z-50 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-neutral-800 transition-colors"
+        onClick={() => onOpenChange(true)}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-fuego text-white shadow-lg transition-colors hover:bg-fuego-oscuro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
         aria-label="Carrito de compras"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -124,11 +227,15 @@ function CartButton() {
           />
         </svg>
         {totalItems > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-xs font-semibold rounded-full flex items-center justify-center border border-neutral-200">
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-arena bg-white text-xs font-semibold text-carbon">
             {totalItems}
           </span>
         )}
       </button>
+
+      {order && (
+        <InvoiceModal order={order} onClose={closeCheckout} onGoToMenu={goToMenu} />
+      )}
     </>
   )
 }

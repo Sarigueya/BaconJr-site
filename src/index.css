@@ -1,5 +1,52 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --color-carbon: #1C1410;        /* negro cálido: textos, footer, hero */
+  --color-carbon-suave: #2B1E16;  /* hover sobre fondos oscuros */
+  --color-roble: #6B3E1F;         /* café: precios, títulos secundarios */
+  --color-fuego: #F15A24;         /* naranja principal: rellenos, bordes y focos */
+  --color-fuego-oscuro: #C94A1B;  /* fondo de CTAs y texto naranja accesible */
+  --color-fuego-profundo: #A93D16; /* hover de CTAs primarios */
+  --color-llama: #F28C28;         /* naranja brillante: íconos/acentos en fondo oscuro */
+  --color-dorado: #F5A623;        /* amarillo: destacados, estrellas, texto sobre carbón */
+  --color-brasa: #B91C1C;         /* rojo: ofertas, descuentos, contador del carrito */
+  --color-crema: #FFF8EE;         /* fondo general cálido */
+  --color-arena: #EADBC8;         /* bordes y separadores */
+  --color-humo: #7A6555;          /* texto secundario */
+}
+
+:root {
+  --navbar-height: 6rem;
+}
+
+html {
+  scroll-padding-top: var(--navbar-height);
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--color-carbon);
+}
+
+@layer base {
+  a,
+  button:not(:disabled),
+  [role='button'],
+  summary {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a,
+    button:not(:disabled),
+    [role='button'] {
+      transition-property: color, background-color, border-color, box-shadow,
+        transform, opacity, text-decoration-color;
+      transition-duration: 200ms;
+      transition-timing-function: ease;
+    }
+  }
+}
 
 @keyframes autoProgress {
   from {
@@ -7,6 +54,49 @@
   }
   to {
     width: 100%;
+  }
+}
+
+
+/* Entrada del modal de oferta del día */
+@keyframes offerFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes offerPop {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Resaltado breve de la oferta a la que se llega desde el carrusel */
+@keyframes offerGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 90, 36, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(241, 90, 36, 0.55);
+  }
+}
+
+/* Sin movimiento: las animaciones de entrada de modales y de resaltado se
+   desactivan (el elemento se muestra directamente en su estado final). */
+@media (prefers-reduced-motion: reduce) {
+  [class*='animate-[offerFade'],
+  [class*='animate-[offerPop'],
+  [class*='animate-[offerGlow'] {
+    animation: none;
   }
 }
 
