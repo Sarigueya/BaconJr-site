@@ -8,6 +8,8 @@ import { BUSINESS } from '../data/business'
 import { FULFILLMENT_OPTIONS, PAYMENT_METHODS } from '../data/checkout'
 import { createChatbot } from '../utils/chatbotEngine'
 import { formatPrice } from '../utils/formatPrice'
+import { useGsapReveal } from '../hooks/useGsapReveal'
+import baconJrChatIcon from '../assets/chatbot/baconjrchatbot.svg'
 
 const reply = createChatbot({
   products: PRODUCTS,
@@ -34,10 +36,22 @@ const WELCOME = {
 const TYPING_DELAY_MS = 550
 
 function ProductChip({ product, onAdd }) {
+  const imageRef = useRef(null)
+
+  useGsapReveal(imageRef, {
+    from: { autoAlpha: 0, scale: 0.8 },
+    to: { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'power2.out' },
+  })
+
   return (
     <div className="flex items-center gap-2 rounded-xl border border-arena bg-white p-2">
       {product.image && (
-        <img src={product.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+        <img
+          ref={imageRef}
+          src={product.image}
+          alt=""
+          className="h-10 w-10 shrink-0 rounded-lg object-cover"
+        />
       )}
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-carbon">{product.name}</p>
@@ -64,8 +78,20 @@ function ChatbotWidget({ isOpen, onToggle, onOpenCart }) {
   const nextMessageId = useRef(2)
   const lastProductRef = useRef(null)
   const replyTimeoutRef = useRef(null)
+  const chatButtonRef = useRef(null)
   const navigate = useNavigate()
   const { items, addItem } = useCart()
+
+  useGsapReveal(chatButtonRef, {
+    from: { autoAlpha: 0, scale: 0.82 },
+    to: {
+      autoAlpha: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: 'back.out(1.6)',
+      clearProps: 'transform',
+    },
+  })
 
   // Solo las acciones del último mensaje del bot quedan activas.
   const lastBotId = useMemo(
@@ -294,9 +320,10 @@ function ChatbotWidget({ isOpen, onToggle, onOpenCart }) {
 
       {/* Botón flotante */}
       <button
+        ref={chatButtonRef}
         type="button"
         onClick={onToggle}
-        className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-fuego text-white shadow-lg transition-colors hover:bg-fuego-oscuro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
+        className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-fuego text-white shadow-lg transition-colors hover:bg-fuego-oscuro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado"
         aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat de ayuda'}
       >
         {isOpen ? (
@@ -304,7 +331,12 @@ function ChatbotWidget({ isOpen, onToggle, onOpenCart }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <span className="text-xl font-bold">?</span>
+          <img
+            src={baconJrChatIcon}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full scale-[1.18] -translate-x-[8%] translate-y-[8%] object-contain"
+          />
         )}
       </button>
     </>
