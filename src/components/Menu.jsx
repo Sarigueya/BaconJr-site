@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import CategoryFilters from './CategoryFilters'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
+import { refreshScrollTriggers } from '../hooks/useGsapReveal'
 import { CATEGORIES, PRODUCTS } from '../data/products'
 
 const CATEGORY_IDS = new Set(CATEGORIES.map((category) => category.id))
@@ -16,6 +17,12 @@ function Menu() {
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'all') return PRODUCTS
     return PRODUCTS.filter((product) => product.category === activeCategory)
+  }, [activeCategory])
+
+  // Al filtrar cambia la altura de la página; recalcula los triggers para que
+  // las secciones animadas que quedan más abajo no se queden invisibles.
+  useLayoutEffect(() => {
+    refreshScrollTriggers()
   }, [activeCategory])
 
   const handleCategoryChange = (category) => {

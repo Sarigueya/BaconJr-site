@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
 import { COCKTAIL_PRICES, COCKTAIL_TABS } from '../data/cocktails'
 import { useCocktails } from '../hooks/useCocktails'
+import { refreshScrollTriggers, useGsapReveal } from '../hooks/useGsapReveal'
 import { formatPrice } from '../utils/formatPrice'
 
 const PAGE_SIZE = 8
@@ -25,12 +26,32 @@ function Cocktails() {
   const [query, setQuery] = useState('')
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [selected, setSelected] = useState(null)
+  const headerRef = useRef(null)
+  const controlsRef = useRef(null)
+
+  useGsapReveal(headerRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 16 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+  })
+
+  useGsapReveal(controlsRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 14 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.08 },
+  })
 
   const { items, total, isLoading, isLoadingMore, error, isSearch, retry } = useCocktails({
     tab,
     query,
     limit,
   })
+
+  // La cuadrícula aparece tras la carga asíncrona: recalcula los triggers
+  // cuando cambian los resultados, la pestaña, la búsqueda o el paginado.
+  useEffect(() => {
+    refreshScrollTriggers()
+  }, [items, tab, query, limit])
 
   const changeTab = (id) => {
     setTab(id)
@@ -44,7 +65,7 @@ function Cocktails() {
   return (
     <section id="cocteles" className="border-t border-arena bg-crema py-12 md:py-16" aria-labelledby="cocteles-title">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
+        <div ref={headerRef} className="mb-8 text-center">
           <h2 id="cocteles-title" className="mb-3 text-3xl font-bold text-carbon md:text-4xl">
             Coctelería
           </h2>
@@ -54,7 +75,7 @@ function Cocktails() {
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+        <div ref={controlsRef} className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <div role="tablist" aria-label="Tipo de bebida" className="inline-flex rounded-full border border-arena bg-white p-1">
             {COCKTAIL_TABS.map((option) => {
               const isActive = !isSearch && tab === option.id
