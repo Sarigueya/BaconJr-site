@@ -1,6 +1,7 @@
 import costillasBbq from '../assets/offers/costillas-bbq.png'
 import comboFamiliar from '../assets/offers/combo-familiar.png'
 import happyHour from '../assets/offers/happy-hour.png'
+import conoDeChicharron from '../assets/offers/Cono de chicharrón con papas fritas.svg'
 
 export const OFFERS = [
   {
@@ -41,4 +42,15 @@ export const OFFERS = [
   },
 ]
 
-export const DAILY_OFFER = OFFERS[0]
+export const FLASH_OFFER = {
+  id: 'flash-cono-chicharron',
+  title: 'Cono Bacon Jr. Especial',
+  name: 'Cono Bacon Jr. Especial',
+  description: 'Cono de chicharrón con papas fritas doradas por tiempo limitado.',
+  longDescription:
+    'Disfruta nuestro cono de chicharrón crujiente con papas fritas doradas. Oferta flash disponible solo durante el próximo minuto en esta visita.',
+  originalPrice: 24900,
+  price: 14900,
+  image: conoDeChicharron,
+  tag: 'Flash',
+}

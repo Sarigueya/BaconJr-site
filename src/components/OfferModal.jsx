@@ -1,19 +1,39 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 import { formatPrice } from '../utils/formatPrice'
 import OfferOrderForm from './OfferOrderForm'
 
-function OfferModal({ offer, onClose }) {
+function OfferModal({ offer, onClose, onAdded }) {
   if (!offer) return null
 
-  return <OfferModalContent key={offer.id} offer={offer} onClose={onClose} />
+  return (
+    <OfferModalContent
+      key={offer.id}
+      offer={offer}
+      onClose={onClose}
+      onAdded={onAdded}
+    />
+  )
 }
 
-function OfferModalContent({ offer, onClose }) {
+function OfferModalContent({ offer, onClose, onAdded }) {
   const closeButtonRef = useRef(null)
+  const imageRef = useRef(null)
+  const contentRef = useRef(null)
 
   useBodyScrollLock()
+
+  useGsapReveal(imageRef, {
+    from: { autoAlpha: 0, scale: 0.96 },
+    to: { autoAlpha: 1, scale: 1, duration: 0.55, ease: 'power2.out' },
+  })
+
+  useGsapReveal(contentRef, {
+    from: { autoAlpha: 0, y: 18 },
+    to: { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.06 },
+  })
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -55,18 +75,19 @@ function OfferModalContent({ offer, onClose }) {
           </svg>
         </button>
 
-        <div className="relative aspect-[4/3] bg-arena/40 md:aspect-auto md:min-h-[26rem]">
+        <div className="relative aspect-square bg-arena/40 sm:aspect-[4/3] md:aspect-auto md:min-h-[28rem]">
           <img
+            ref={imageRef}
             src={offer.image}
             alt={offer.title}
-            className="absolute inset-0 h-full w-full object-contain p-4"
+            className="absolute inset-0 h-full w-full object-contain p-3"
           />
           <span className="absolute bottom-4 left-4 rounded-full bg-brasa px-3 py-1 text-xs font-black tracking-wide text-white uppercase shadow-lg">
             {offer.tag}
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 p-6">
+        <div ref={contentRef} className="flex flex-col gap-4 p-6">
           <div>
             <p className="text-xs font-bold tracking-[0.18em] text-fuego-oscuro uppercase">
               Oferta especial
@@ -91,7 +112,7 @@ function OfferModalContent({ offer, onClose }) {
             </span>
           </div>
 
-          <OfferOrderForm offer={offer} onAdded={onClose} />
+          <OfferOrderForm offer={offer} onAdded={onAdded ?? onClose} />
         </div>
       </div>
     </div>,
