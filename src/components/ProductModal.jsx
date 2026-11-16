@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { formatPrice } from '../utils/formatPrice'
 import { CATEGORIES } from '../data/products'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 import useLineOrder from '../hooks/useLineOrder'
 
 function ProductModal({ product, onClose }) {
@@ -23,8 +24,20 @@ function ProductModalContent({ product, onClose }) {
     submit,
   } = useLineOrder(product, 1)
   const closeButtonRef = useRef(null)
+  const imageRef = useRef(null)
+  const contentRef = useRef(null)
 
   useBodyScrollLock()
+
+  useGsapReveal(imageRef, {
+    from: { autoAlpha: 0, scale: 0.97 },
+    to: { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'power2.out' },
+  })
+
+  useGsapReveal(contentRef, {
+    from: { autoAlpha: 0, y: 18 },
+    to: { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.06 },
+  })
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -93,6 +106,7 @@ function ProductModalContent({ product, onClose }) {
 
         <div className="relative aspect-[4/3] bg-crema md:aspect-auto md:min-h-[26rem]">
           <img
+            ref={imageRef}
             src={product.imageLarge ?? product.image}
             alt={product.name}
             className="absolute inset-0 h-full w-full object-cover"
@@ -106,7 +120,7 @@ function ProductModalContent({ product, onClose }) {
           </span>
         </div>
 
-        <div className="flex flex-col gap-5 p-6 sm:p-7">
+        <div ref={contentRef} className="flex flex-col gap-5 p-6 sm:p-7">
           <div>
             <h2 id="product-modal-title" className="text-2xl font-black text-carbon sm:text-3xl">
               {product.name}

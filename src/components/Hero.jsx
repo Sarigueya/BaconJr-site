@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import gsap from 'gsap'
 import LocationModal from './LocationModal'
 import { LOCATION_STORAGE_KEY } from '../data/stores'
+import { useGsapReveal } from '../hooks/useGsapReveal'
+import { prefersReducedMotion } from '../utils/motion'
 import heroBackground from '../assets/hero/hero-background.png'
 
 const readStoredLocation = () => {
@@ -18,15 +21,38 @@ const readStoredLocation = () => {
 function Hero() {
   const [isLocationOpen, setIsLocationOpen] = useState(false)
   const [userLocation, setUserLocation] = useState(readStoredLocation)
+  const heroRef = useRef(null)
+  const contentRef = useRef(null)
+
+  useGsapReveal(contentRef, {
+    from: { autoAlpha: 0, y: 20 },
+    to: { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' },
+  })
+
+  // La imagen del hero es un fondo CSS: animamos su posición para dar profundidad.
+  useEffect(() => {
+    if (!heroRef.current || prefersReducedMotion()) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        heroRef.current,
+        { backgroundPosition: '50% 42%' },
+        { backgroundPosition: '50% 50%', duration: 1.6, ease: 'power2.out' }
+      )
+    }, heroRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section
+      ref={heroRef}
       id="hero"
       className="relative flex min-h-[80vh] items-center overflow-hidden bg-carbon bg-cover bg-center bg-no-repeat pt-[var(--navbar-height)] text-crema"
       style={{ backgroundImage: `url(${heroBackground})` }}
     >
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:pb-14 md:pb-20">
-        <div className="max-w-2xl">
+        <div ref={contentRef} className="max-w-2xl">
           <p className="text-sm font-semibold tracking-widest uppercase text-dorado mb-4">
             Asados al Barril
           </p>

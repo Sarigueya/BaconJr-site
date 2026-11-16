@@ -4,6 +4,7 @@ import logo from '../assets/brand/logoBaconjrv2.svg'
 import AuthModal from './AuthModal'
 import MobileMenu from './MobileMenu'
 import { scrollToSection } from '../utils/scrollToSection'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 const NAV_LINKS = [
   { label: 'Menú', to: '/menu' },
@@ -17,7 +18,13 @@ function Navbar() {
   const [isPastHero, setIsPastHero] = useState(false)
   const [isPastMenuFilters, setIsPastMenuFilters] = useState(false)
   const navBarRef = useRef(null)
+  const logoRef = useRef(null)
   const location = useLocation()
+
+  useGsapReveal(logoRef, {
+    from: { autoAlpha: 0, x: -14 },
+    to: { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power2.out' },
+  })
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev)
   const closeMenu = useCallback(() => setIsMenuOpen(false), [])
@@ -173,7 +180,7 @@ function Navbar() {
               className="flex shrink-0 items-center"
               aria-label="Bacon Jr. — Inicio"
             >
-              <img src={logo} alt="Bacon Jr." className="h-12 w-auto sm:h-14 md:h-16" />
+              <img ref={logoRef} src={logo} alt="Bacon Jr." className="h-12 w-auto sm:h-14 md:h-16" />
             </Link>
           </div>
 

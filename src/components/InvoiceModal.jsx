@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
@@ -6,6 +7,7 @@ import { LOCATION_STORAGE_KEY, NEARBY_STORES } from '../data/stores'
 import { FULFILLMENT_OPTIONS, PAYMENT_METHODS } from '../data/checkout'
 import SocialLinks from './SocialLinks'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { prefersReducedMotion } from '../utils/motion'
 
 // Pasos del checkout:
 // 'invoice'       -> resumen/factura del pedido
@@ -120,6 +122,33 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
   // Al cambiar de paso, el foco pasa al panel para lectores de pantalla y teclado.
   useEffect(() => {
     panelRef.current?.focus()
+  }, [step])
+
+  // Entrada suave de las imágenes (logo y miniaturas) en cada paso del checkout.
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+    if (prefersReducedMotion()) return
+
+    const images = panel.querySelectorAll('img')
+    if (!images.length) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        images,
+        { autoAlpha: 0, y: 8 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+          stagger: 0.03,
+          clearProps: 'transform',
+        }
+      )
+    }, panel)
+
+    return () => ctx.revert()
   }, [step])
 
   const titleId = 'invoice-modal-title'

@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { CATEGORIES } from '../data/products'
+import { useGsapStaggerReveal } from '../hooks/useGsapReveal'
 
 // Color de cada categoría. Las fotos están en src/data/products.js.
 const CATEGORY_STYLES = {
@@ -12,9 +14,22 @@ const CATEGORY_STYLES = {
 
 function CategoryFilters({ activeCategory, onChange, variant = 'menu' }) {
   const ringOffset = variant === 'home' ? 'ring-offset-crema' : 'ring-offset-white'
+  const listRef = useRef(null)
+
+  useGsapStaggerReveal(listRef, '[data-category-media]', {
+    from: { autoAlpha: 0, y: 14 },
+    to: {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.5,
+      ease: 'power2.out',
+      stagger: 0.06,
+    },
+  })
 
   return (
     <div
+      ref={listRef}
       className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:gap-4 lg:mx-0 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="Categorías del menú"
@@ -33,7 +48,10 @@ function CategoryFilters({ activeCategory, onChange, variant = 'menu' }) {
               isActive ? `-translate-y-1 ring-2 ring-fuego ring-offset-2` : ''
             }`}
           >
-            <span className="block h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/25 sm:h-20 sm:w-20">
+            <span
+              data-category-media
+              className="block h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/25 sm:h-20 sm:w-20"
+            >
               <img
                 src={category.image}
                 alt=""

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
@@ -6,6 +6,7 @@ import { CATEGORIES } from '../data/products'
 import { BUSINESS } from '../data/business'
 import { scrollToSection } from '../utils/scrollToSection'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import { useGsapReveal, useGsapStaggerReveal } from '../hooks/useGsapReveal'
 
 const MAIN_LINKS = [
   { label: 'Inicio', to: '/', isActive: (loc) => loc.pathname === '/' && !loc.hash },
@@ -16,8 +17,30 @@ const MAIN_LINKS = [
 
 function MobileMenu({ isOpen, onClose, onOrder }) {
   const location = useLocation()
+  const categoryListRef = useRef(null)
+  const logoRef = useRef(null)
 
   useBodyScrollLock(isOpen)
+
+  useGsapReveal(logoRef, {
+    enabled: isOpen,
+    from: { autoAlpha: 0, x: -10 },
+    to: { autoAlpha: 1, x: 0, duration: 0.45, ease: 'power2.out' },
+  })
+
+  useGsapStaggerReveal(categoryListRef, 'img', {
+    enabled: isOpen,
+    triggerOnScroll: false,
+    from: { autoAlpha: 0, scale: 0.8 },
+    to: {
+      autoAlpha: 1,
+      scale: 1,
+      duration: 0.4,
+      ease: 'power2.out',
+      stagger: 0.05,
+      clearProps: 'transform',
+    },
+  })
 
   const handleLinkClick = (event, section) => {
     if (!section || location.pathname !== '/') return
@@ -58,7 +81,7 @@ function MobileMenu({ isOpen, onClose, onOrder }) {
       >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <Link to="/" onClick={onClose} aria-label="Bacon Jr. — Inicio">
-            <img src={logo} alt="Bacon Jr." className="h-10 w-auto" />
+            <img ref={logoRef} src={logo} alt="Bacon Jr." className="h-10 w-auto" />
           </Link>
           <button
             type="button"
@@ -105,7 +128,7 @@ function MobileMenu({ isOpen, onClose, onOrder }) {
           <p className="mt-6 mb-3 px-3 text-xs font-semibold tracking-wider text-arena/50 uppercase">
             Categorías
           </p>
-          <ul className="grid grid-cols-2 gap-2">
+          <ul ref={categoryListRef} className="grid grid-cols-2 gap-2">
             {CATEGORIES.map((category) => (
               <li key={category.id}>
                 <Link

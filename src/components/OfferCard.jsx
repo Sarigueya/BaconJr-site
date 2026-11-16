@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { formatPrice } from '../utils/formatPrice'
 import OfferOrderForm from './OfferOrderForm'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 function OfferCard({ offer, isHighlighted = false }) {
   const [isFlipped, setIsFlipped] = useState(false)
@@ -8,6 +9,13 @@ function OfferCard({ offer, isHighlighted = false }) {
   const frontTriggerRef = useRef(null)
   const backTriggerRef = useRef(null)
   const isInitialMount = useRef(true)
+  const imageWrapRef = useRef(null)
+
+  useGsapReveal(imageWrapRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 18, scale: 0.98 },
+    to: { autoAlpha: 1, y: 0, scale: 1, duration: 0.7, ease: 'power2.out' },
+  })
 
   useEffect(() => {
     const onKeyDown = (event) => {

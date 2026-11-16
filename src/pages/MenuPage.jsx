@@ -1,7 +1,16 @@
+import { useRef } from 'react'
 import Menu from '../components/Menu'
 import Cocktails from '../components/Cocktails'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 function MenuPage() {
+  const headerRef = useRef(null)
+
+  useGsapReveal(headerRef, {
+    from: { autoAlpha: 0, y: 14 },
+    to: { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+  })
+
   return (
     <>
       <section
@@ -9,15 +18,17 @@ function MenuPage() {
         aria-labelledby="menu-page-title"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-          <h1
-            id="menu-page-title"
-            className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-crema"
-          >
-            Menú
-          </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-arena">
-            Cortes, bebidas y acompañantes preparados al carbón.
-          </p>
+          <div ref={headerRef}>
+            <h1
+              id="menu-page-title"
+              className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-crema"
+            >
+              Menú
+            </h1>
+            <p className="mt-1.5 max-w-xl text-sm text-arena">
+              Cortes, bebidas y acompañantes preparados al carbón.
+            </p>
+          </div>
         </div>
       </section>
 

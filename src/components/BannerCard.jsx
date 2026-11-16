@@ -1,3 +1,7 @@
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+import { prefersReducedMotion } from '../utils/motion'
+
 function BannerCard({
   id,
   title,
@@ -10,6 +14,40 @@ function BannerCard({
 }) {
   const isCutout = imageMode === 'cutout'
   const loading = id === 1 ? 'eager' : 'lazy'
+  const imageRef = useRef(null)
+  const contentRef = useRef(null)
+
+  useEffect(() => {
+    if (!isActive || !imageRef.current) return
+    if (prefersReducedMotion()) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        imageRef.current,
+        { autoAlpha: 0, scale: 1.04, y: 12 },
+        { autoAlpha: 1, scale: 1, y: 0, duration: 0.9, ease: 'power2.out', overwrite: 'auto' }
+      )
+
+      const items = contentRef.current?.querySelectorAll('[data-banner-item]')
+      if (items?.length) {
+        gsap.fromTo(
+          items,
+          { autoAlpha: 0, y: 14 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.55,
+            ease: 'power2.out',
+            stagger: 0.07,
+            delay: 0.12,
+            clearProps: 'transform',
+          }
+        )
+      }
+    }, imageRef)
+
+    return () => ctx.revert()
+  }, [isActive, id])
 
   return (
     <div
@@ -30,6 +68,7 @@ function BannerCard({
           />
           {/* Imagen recortada sin fondo: se funde con el color sólido. */}
           <img
+            ref={imageRef}
             src={image}
             alt=""
             aria-hidden="true"
@@ -46,6 +85,7 @@ function BannerCard({
         <>
           {/* Imagen de fondo a sangre completa. */}
           <img
+            ref={imageRef}
             src={image}
             alt=""
             aria-hidden="true"
@@ -63,24 +103,27 @@ function BannerCard({
 
       <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col items-center justify-end px-4 pt-10 pb-16 sm:px-6 md:flex-row md:items-center md:justify-start md:py-10 lg:px-8">
         <div
+          ref={contentRef}
           className={`max-w-xl text-center md:text-left ${
             isCutout ? 'md:max-w-[38%]' : ''
           }`}
         >
-          <p className="mb-3 text-xs font-bold tracking-[0.22em] text-dorado uppercase">
+          <p data-banner-item className="mb-3 text-xs font-bold tracking-[0.22em] text-dorado uppercase">
             Bacon Jr. · Especial del día
           </p>
-          <h2 className="text-3xl leading-tight font-black text-crema sm:text-4xl md:text-5xl lg:text-6xl">
+          <h2 data-banner-item className="text-3xl leading-tight font-black text-crema sm:text-4xl md:text-5xl lg:text-6xl">
             {title}
           </h2>
-          <p className="mt-4 text-base text-arena sm:text-lg">{subtitle}</p>
-          <button
-            type="button"
-            onClick={onCta}
-            className="mt-7 inline-flex cursor-pointer items-center justify-center rounded-xl bg-dorado px-7 py-3 text-sm font-bold text-carbon shadow-[0_16px_30px_-16px_rgba(245,166,35,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-llama hover:shadow-[0_20px_36px_-14px_rgba(242,140,40,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 focus-visible:ring-offset-carbon"
-          >
-            {cta}
-          </button>
+          <p data-banner-item className="mt-4 text-base text-arena sm:text-lg">{subtitle}</p>
+          <span data-banner-item className="mt-7 inline-block">
+            <button
+              type="button"
+              onClick={onCta}
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-dorado px-7 py-3 text-sm font-bold text-carbon shadow-[0_16px_30px_-16px_rgba(245,166,35,0.8)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-llama hover:shadow-[0_20px_36px_-14px_rgba(242,140,40,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado focus-visible:ring-offset-2 focus-visible:ring-offset-carbon"
+            >
+              {cta}
+            </button>
+          </span>
         </div>
       </div>
     </div>

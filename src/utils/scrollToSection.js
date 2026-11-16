@@ -1,5 +1,6 @@
 import gsap from 'gsap'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { prefersReducedMotion } from './motion'
 
 gsap.registerPlugin(ScrollToPlugin)
 
@@ -10,9 +11,6 @@ const getNavbarOffset = () => {
 
 const DESKTOP_QUERY = '(min-width: 1024px)'
 const EXTRA_OFFSET = 16
-
-const prefersReducedMotion = () =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export function scrollToSection(id) {
   const target = document.getElementById(id)

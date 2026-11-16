@@ -1,7 +1,9 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import SocialLinks from './SocialLinks'
 import { BUSINESS } from '../data/business'
+import { useGsapReveal, useGsapStaggerReveal } from '../hooks/useGsapReveal'
 
 const FOOTER_LINKS = [
   {
@@ -72,6 +74,20 @@ function FooterHeading({ children }) {
 }
 
 function Footer() {
+  const logoRef = useRef(null)
+  const columnsRef = useRef(null)
+
+  useGsapReveal(logoRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 14 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+  })
+
+  useGsapStaggerReveal(columnsRef, '[data-footer-col]', {
+    from: { autoAlpha: 0, y: 18 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.1 },
+  })
+
   return (
     <footer className="relative isolate overflow-hidden bg-carbon text-crema">
       {/* Línea y resplandor de brasa en la parte superior */}
@@ -114,10 +130,10 @@ function Footer() {
         </div>
 
         {/* Columnas principales */}
-        <div className="grid grid-cols-1 gap-12 py-14 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-          <div className="sm:col-span-2 lg:col-span-4">
+        <div ref={columnsRef} className="grid grid-cols-1 gap-12 py-14 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <div data-footer-col className="sm:col-span-2 lg:col-span-4">
             <Link to="/" aria-label="Bacon Jr. — Inicio" className="inline-block">
-              <img src={logo} alt="Bacon Jr." className="h-14 w-auto" />
+              <img ref={logoRef} src={logo} alt="Bacon Jr." className="h-14 w-auto" />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-arena/70">
               Asados al barril desde 1995. Sabor, tradición y calidad en cada corte.
@@ -129,7 +145,7 @@ function Footer() {
           </div>
 
           {FOOTER_LINKS.map((column) => (
-            <div key={column.title} className="lg:col-span-2">
+            <div key={column.title} data-footer-col className="lg:col-span-2">
               <FooterHeading>{column.title}</FooterHeading>
               <ul className="space-y-3">
                 {column.links.map((link) => (
@@ -150,7 +166,7 @@ function Footer() {
             </div>
           ))}
 
-          <div className="sm:col-span-2 lg:col-span-4">
+          <div data-footer-col className="sm:col-span-2 lg:col-span-4">
             <FooterHeading>Visítanos</FooterHeading>
             <ul className="space-y-4">
               {CONTACT_INFO.map((item) => (

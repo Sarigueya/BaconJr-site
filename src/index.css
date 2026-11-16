@@ -90,3 +90,13 @@ body {
   }
 }
 
+/* Sin movimiento: las animaciones de entrada de modales y de resaltado se
+   desactivan (el elemento se muestra directamente en su estado final). */
+@media (prefers-reduced-motion: reduce) {
+  [class*='animate-[offerFade'],
+  [class*='animate-[offerPop'],
+  [class*='animate-[offerGlow'] {
+    animation: none;
+  }
+}
+

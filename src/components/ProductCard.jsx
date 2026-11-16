@@ -1,13 +1,23 @@
+import { useRef } from 'react'
 import { useCart } from '../context/cart-context'
 import { formatPrice } from '../utils/formatPrice'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 function ProductCard({ product, onView }) {
   const { adjustProductQuantity, getQuantity } = useCart()
   const quantity = getQuantity(product.id)
+  const imageWrapRef = useRef(null)
+
+  useGsapReveal(imageWrapRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 16, scale: 1.02 },
+    to: { autoAlpha: 1, y: 0, scale: 1, duration: 0.65, ease: 'power2.out' },
+  })
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-arena bg-white transition-all duration-300 hover:-translate-y-1 hover:border-fuego hover:shadow-[0_22px_40px_-24px_rgba(241,90,36,0.55)]">
       <button
+        ref={imageWrapRef}
         type="button"
         onClick={(event) => {
           event.stopPropagation()

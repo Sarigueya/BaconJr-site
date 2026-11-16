@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import BannerCard from './BannerCard'
 import OfferModal from './OfferModal'
 import { OFFERS } from '../data/offers'
+import { prefersReducedMotion } from '../utils/motion'
 import carouselCostillas from '../assets/offers/carousel-costillas-bbq.svg'
 import carouselComboFamiliar from '../assets/offers/carousel-combo-familiar.svg'
 import carouselHappyHour from '../assets/offers/carousel-happy-hour.svg'
@@ -58,11 +59,7 @@ function HeroSlider() {
   }, [])
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches
-
-    if (isPaused || prefersReducedMotion) {
+    if (isPaused || prefersReducedMotion()) {
       clearInterval(timerRef.current)
       return
     }

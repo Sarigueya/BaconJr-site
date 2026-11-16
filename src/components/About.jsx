@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import restaurantImage from '../assets/about/restaurantepuntofisico.png'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 const STATS = [
   { value: '30+', label: 'Años de tradición' },
@@ -7,11 +9,26 @@ const STATS = [
 ]
 
 function About() {
+  const imageWrapRef = useRef(null)
+  const contentRef = useRef(null)
+
+  useGsapReveal(imageWrapRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, x: -24 },
+    to: { autoAlpha: 1, x: 0, duration: 0.75, ease: 'power2.out' },
+  })
+
+  useGsapReveal(contentRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, x: 16 },
+    to: { autoAlpha: 1, x: 0, duration: 0.75, ease: 'power2.out', delay: 0.08 },
+  })
+
   return (
     <section id="about" className="bg-crema py-12 md:py-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
+          <div ref={imageWrapRef} className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
             <img
               src={restaurantImage}
               alt="Punto físico de Bacon Jr."
@@ -24,7 +41,7 @@ function About() {
             </span>
           </div>
 
-          <div>
+          <div ref={contentRef}>
             <h2 className="text-3xl md:text-4xl font-bold text-carbon mb-4">
               Nuestra Historia
             </h2>

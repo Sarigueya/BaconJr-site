@@ -1,11 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { OFFERS } from '../data/offers'
 import OfferCard from './OfferCard'
+import { useGsapReveal, useGsapStaggerReveal } from '../hooks/useGsapReveal'
 
 function Offers() {
   const { hash, key } = useLocation()
   const [highlightedId, setHighlightedId] = useState(null)
+  const headerRef = useRef(null)
+  const gridRef = useRef(null)
+  const footerTextRef = useRef(null)
+
+  useGsapReveal(headerRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0, y: 16 },
+    to: { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+  })
+
+  useGsapStaggerReveal(gridRef, '[data-offer-card]', {
+    from: { autoAlpha: 0, y: 22 },
+    to: {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.65,
+      ease: 'power2.out',
+      stagger: 0.1,
+      clearProps: 'transform',
+    },
+  })
+
+  useGsapReveal(footerTextRef, {
+    triggerOnScroll: true,
+    from: { autoAlpha: 0 },
+    to: { autoAlpha: 1, duration: 0.6, ease: 'power2.out', delay: 0.2 },
+  })
 
   useEffect(() => {
     const id = hash.replace('#', '')
@@ -41,7 +69,7 @@ function Offers() {
       />
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 2xl:max-w-[88rem]">
-        <div className="mb-4 text-center md:mb-5">
+        <div ref={headerRef} className="mb-4 text-center md:mb-5">
           <p className="mb-2 hidden text-xs font-bold tracking-[0.22em] text-dorado uppercase sm:block">
             Recién salido del barril
           </p>
@@ -50,17 +78,18 @@ function Offers() {
           </h2>
         </div>
 
-        <div id="offers-grid" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div ref={gridRef} id="offers-grid" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {OFFERS.map((offer) => (
-            <OfferCard
-              key={offer.id}
-              offer={offer}
-              isHighlighted={highlightedId === offer.id}
-            />
+            <div key={offer.id} data-offer-card>
+              <OfferCard
+                offer={offer}
+                isHighlighted={highlightedId === offer.id}
+              />
+            </div>
           ))}
         </div>
 
-        <p className="mx-auto mt-5 max-w-xl text-center text-xs text-crema/60 sm:mt-6 sm:text-sm">
+        <p ref={footerTextRef} className="mx-auto mt-5 max-w-xl text-center text-xs text-crema/60 sm:mt-6 sm:text-sm">
           Toca la imagen de una oferta para ver el detalle, dejar tu comentario y agregarla al carrito.
         </p>
       </div>
