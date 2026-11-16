@@ -54,7 +54,7 @@ const INTENTS = {
 
 const PRONOUNS = ['lo', 'la', 'eso', 'esa', 'ese', 'agregalo', 'agregala', 'anadelo', 'anadela', 'pidelo', 'quierolo']
 
-export function normalize(text) {
+function normalize(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
@@ -125,7 +125,7 @@ const formatMoney = (value) => `$${value}`
 
 const listLines = (items, render) => items.map((item) => `• ${render(item)}`).join('\n')
 
-export function getOpenStatus(schedule, now = new Date()) {
+function getOpenStatus(schedule, now = new Date()) {
   const [open, close] = schedule[now.getDay()]
   const hour = now.getHours() + now.getMinutes() / 60
   if (hour >= open && hour < close) {

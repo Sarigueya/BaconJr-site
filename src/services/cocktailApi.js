@@ -21,7 +21,7 @@ const translateIngredient = (name) => INGREDIENT_ES[name.toLowerCase()] ?? name
 
 // Convierte la respuesta de la API al mismo formato que los productos del menú,
 // para que funcione con las tarjetas, el modal y el carrito.
-export function toProduct(drink) {
+function toProduct(drink) {
   const ingredients = []
   for (let i = 1; i <= 15; i += 1) {
     const name = drink[`strIngredient${i}`]?.trim()
