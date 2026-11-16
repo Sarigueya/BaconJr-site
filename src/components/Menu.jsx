@@ -1,18 +1,18 @@
 import { useLayoutEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import CategoryFilters from './CategoryFilters'
 import ProductCard from './ProductCard'
 import ProductModal from './ProductModal'
 import { refreshScrollTriggers } from '../hooks/useGsapReveal'
-import { CATEGORIES, PRODUCTS } from '../data/products'
-
-const CATEGORY_IDS = new Set(CATEGORIES.map((category) => category.id))
+import { resolveMenuCategory } from '../utils/menuCategory'
+import { PRODUCTS } from '../data/products'
 
 function Menu() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const categoryParam = searchParams.get('category')
-  const activeCategory = CATEGORY_IDS.has(categoryParam) ? categoryParam : 'all'
+  const activeCategory = resolveMenuCategory(searchParams.get('category'))
 
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'all') return PRODUCTS
@@ -26,11 +26,12 @@ function Menu() {
   }, [activeCategory])
 
   const handleCategoryChange = (category) => {
-    if (category === 'all') {
-      setSearchParams({})
-      return
-    }
-    setSearchParams({ category })
+    // Limpia el hash para no dejar anclas apuntando a secciones que se ocultan.
+    navigate({
+      pathname,
+      search: category === 'all' ? '' : `?category=${category}`,
+      hash: '',
+    })
   }
 
   return (

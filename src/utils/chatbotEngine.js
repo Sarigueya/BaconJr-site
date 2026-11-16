@@ -186,7 +186,7 @@ export function createChatbot({ products, categories, offers, stores, business, 
   const handlers = {
     cocktails: () => ({
       text: 'Tenemos coctelería clásica (margarita, mojito, piña colada, michelada y más) y bebidas sin alcohol. Puedes ver ingredientes, preparación y agregarlos al carrito en la sección de Coctelería del menú.',
-      actions: [{ type: 'link', label: 'Ver coctelería', to: '/menu#cocteles' }],
+      actions: [{ type: 'link', label: 'Ver coctelería', to: '/menu?category=drinks#cocteles' }],
     }),
     offers: () => ({
       text: `Estas son las promociones de hoy:\n${listLines(
