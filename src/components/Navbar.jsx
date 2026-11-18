@@ -4,7 +4,7 @@ import logo from '../assets/brand/logoBaconjrv2.svg'
 import MobileMenu from './MobileMenu'
 import { scrollToSection } from '../utils/scrollToSection'
 import { useGsapReveal } from '../hooks/useGsapReveal'
-import { useAuth } from '../context/AuthProvider'
+import { useAuth } from '../context/auth-context'
 
 const NAV_LINKS = [
   { label: 'Menú', to: '/menu' },

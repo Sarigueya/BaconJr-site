@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useCart } from '../context/cart-context'
-import { useAuth } from '../context/AuthProvider'
+import { useAuth } from '../context/auth-context'
 import { formatPrice } from '../utils/formatPrice'
 import { LOCATION_STORAGE_KEY, NEARBY_STORES } from '../data/stores'
 import { FULFILLMENT_OPTIONS, PAYMENT_METHODS } from '../data/checkout'
@@ -54,13 +54,17 @@ function InvoiceModal({ order, onClose, onGoToMenu }) {
 
   useBodyScrollLock()
 
-  // Cuando el usuario inicia sesión o crea cuenta desde la factura, se cargan su nombre y dirección
-  useEffect(() => {
-    if (!currentUser) return
-    setDeliveryName(currentUser.name || '')
-    setDeliveryAddress((currentUser.address || '').slice(0, 140))
-    setIsEditingAddress(false)
-  }, [currentUser])
+  // Cuando el usuario inicia sesión o crea cuenta desde la factura, se cargan su nombre y dirección.
+  // Se ajusta durante el render (y no en un efecto) para evitar un render extra en cascada.
+  const [prevUser, setPrevUser] = useState(currentUser)
+  if (currentUser !== prevUser) {
+    setPrevUser(currentUser)
+    if (currentUser) {
+      setDeliveryName(currentUser.name || '')
+      setDeliveryAddress((currentUser.address || '').slice(0, 140))
+      setIsEditingAddress(false)
+    }
+  }
 
   const pickupStore =
     NEARBY_STORES.find((store) => store.id === pickupStoreId) ?? NEARBY_STORES[0]

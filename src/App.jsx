@@ -10,7 +10,8 @@ import AuthModal from './components/AuthModal'
 import HomePage from './pages/HomePage'
 import MenuPage from './pages/MenuPage'
 import { CartProvider } from './context/CartProvider'
-import { AuthProvider, useAuth } from './context/AuthProvider'
+import { AuthProvider } from './context/AuthProvider'
+import { useAuth } from './context/auth-context'
 
 function AppContent() {
   const [activePanel, setActivePanel] = useState(null)

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import logo from '../assets/brand/logoBaconjrv2.svg'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { loginUser, registerUser } from '../utils/authStorage'
+import { SocialAuthFlow, SocialButtons } from './SocialAuth'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -17,6 +18,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
   const [showPolicy, setShowPolicy] = useState(false)
   const [errors, setErrors] = useState({})
   const [authError, setAuthError] = useState('')
+  const [socialProvider, setSocialProvider] = useState(null)
 
   useBodyScrollLock(isOpen)
 
@@ -33,6 +35,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
       setShowPolicy(false)
       setErrors({})
       setAuthError('')
+      setSocialProvider(null)
       return
     }
 
@@ -51,6 +54,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
 
   const switchMode = (nextMode) => {
     setMode(nextMode)
+    setSocialProvider(null)
     setErrors({})
     setAuthError('')
   }
@@ -178,6 +182,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
         </div>
 
         {/* Pestañas: Iniciar sesión / Crear cuenta */}
+        {!socialProvider && (
         <div className="border-b border-arena bg-white px-7 pt-4">
           <div className="grid grid-cols-2 gap-2 rounded-xl border border-arena bg-crema p-1">
             <button
@@ -204,8 +209,16 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
             </button>
           </div>
         </div>
+        )}
 
-        {/* Formulario */}
+        {socialProvider ? (
+          <SocialAuthFlow
+            key={socialProvider}
+            provider={socialProvider}
+            onBack={() => setSocialProvider(null)}
+            onSuccess={(user, action) => onAuthSuccess?.(user, action)}
+          />
+        ) : (
         <form onSubmit={handleSubmit} noValidate className="space-y-4 overflow-y-auto px-7 py-6">
           {authError && (
             <div
@@ -215,6 +228,15 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
               {authError}
             </div>
           )}
+
+          <SocialButtons
+            mode={mode}
+            onSelect={(provider) => {
+              setErrors({})
+              setAuthError('')
+              setSocialProvider(provider)
+            }}
+          />
 
           {mode === 'login' ? (
             <>
@@ -455,6 +477,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, fromCheckout = false }) {
             {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
           </button>
         </form>
+        )}
       </div>
     </div>,
     document.body
